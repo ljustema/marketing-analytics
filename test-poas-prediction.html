@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test POAS Prediction Fix</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; border: 1px solid #f5c6cb; }
+        .info { background-color: #d1ecf1; border: 1px solid #bee5eb; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Test POAS Prediction Algorithm Fix</h1>
+    <div id="results"></div>
+
+    <script src="analytics/poas-utils.js"></script>
+    <script src="analytics/poas-predictor.js"></script>
+    <script>
+        // Sample historical data based on your actual data
+        const testHistoricalData = [
+            // Best performing month (2024-11)
+            {
+                month: "2024-11",
+                revenue: 3419984,
+                grossprofit: 1103583,
+                marketingSpend: 453343,
+                roas: 7.5439214899094065,
+                poas: 2.434322356361519,
+                grossMarginPercent: 32.26865973641982,
+                netProfit: 650240,
+                netProfitPercent: 19.01295444657051
+            },
+            // Recent months (lower performance)
+            {
+                month: "2025-01",
+                revenue: 2297362,
+                grossprofit: 614139,
+                marketingSpend: 197913,
+                roas: 11.607938841814333,
+                poas: 3.1030755938215275,
+                grossMarginPercent: 26.732356502806265,
+                netProfit: 416226,
+                netProfitPercent: 18.117562665352697
+            },
+            {
+                month: "2025-02",
+                revenue: 1427493,
+                grossprofit: 423973,
+                marketingSpend: 121859,
+                roas: 11.714300954381704,
+                poas: 3.479209578283098,
+                grossMarginPercent: 29.700530930799662,
+                netProfit: 302114,
+                netProfitPercent: 21.163956670890855
+            },
+            // Add a few more months for better testing
+            {
+                month: "2024-10",
+                revenue: 3530820,
+                grossprofit: 1060901,
+                marketingSpend: 515699,
+                roas: 6.846668308451248,
+                poas: 2.057209728931024,
+                grossMarginPercent: 30.046872964353888,
+                netProfit: 545202,
+                netProfitPercent: 15.44122894964909
+            }
+        ];
+
+        function runTests() {
+            const results = document.getElementById('results');
+            
+            try {
+                // Test 1: Prediction for POAS 2.5 (close to best performance of 2.434)
+                console.log('Running Test 1: POAS 2.5 prediction...');
+                const prediction25 = POASPredictor.predictNetProfit(2.5, testHistoricalData);
+                
+                results.innerHTML += `
+                    <div class="test-result info">
+                        <h3>Test 1: POAS 2.5 Prediction (Close to Best Performance)</h3>
+                        <p><strong>Target POAS:</strong> 2.5</p>
+                        <p><strong>Best Historical POAS:</strong> 2.434 (Net Profit: 650,240 SEK)</p>
+                        <p><strong>Predicted Net Profit:</strong> ${prediction25.prediction.netProfit.toLocaleString()} SEK</p>
+                        <p><strong>Confidence:</strong> ${prediction25.confidence.level} (${prediction25.confidence.percentage}%)</p>
+                        <p><strong>Recommendation:</strong> ${prediction25.recommendation.action} - ${prediction25.recommendation.message}</p>
+                        <p><strong>Change vs Recent Average:</strong> ${prediction25.comparison.netProfitChangePercent.toFixed(1)}%</p>
+                    </div>
+                `;
+
+                // Test 2: Prediction for POAS 2.4 (exactly at best performance)
+                console.log('Running Test 2: POAS 2.4 prediction...');
+                const prediction24 = POASPredictor.predictNetProfit(2.4, testHistoricalData);
+                
+                results.innerHTML += `
+                    <div class="test-result success">
+                        <h3>Test 2: POAS 2.4 Prediction (Exactly at Best Performance)</h3>
+                        <p><strong>Target POAS:</strong> 2.4</p>
+                        <p><strong>Best Historical POAS:</strong> 2.434 (Net Profit: 650,240 SEK)</p>
+                        <p><strong>Predicted Net Profit:</strong> ${prediction24.prediction.netProfit.toLocaleString()} SEK</p>
+                        <p><strong>Confidence:</strong> ${prediction24.confidence.level} (${prediction24.confidence.percentage}%)</p>
+                        <p><strong>Recommendation:</strong> ${prediction24.recommendation.action} - ${prediction24.recommendation.message}</p>
+                        <p><strong>Change vs Recent Average:</strong> ${prediction24.comparison.netProfitChangePercent.toFixed(1)}%</p>
+                    </div>
+                `;
+
+                // Test 3: Prediction for POAS 3.5 (higher than best performance)
+                console.log('Running Test 3: POAS 3.5 prediction...');
+                const prediction35 = POASPredictor.predictNetProfit(3.5, testHistoricalData);
+                
+                results.innerHTML += `
+                    <div class="test-result info">
+                        <h3>Test 3: POAS 3.5 Prediction (Higher than Best Performance)</h3>
+                        <p><strong>Target POAS:</strong> 3.5</p>
+                        <p><strong>Best Historical POAS:</strong> 2.434 (Net Profit: 650,240 SEK)</p>
+                        <p><strong>Predicted Net Profit:</strong> ${prediction35.prediction.netProfit.toLocaleString()} SEK</p>
+                        <p><strong>Confidence:</strong> ${prediction35.confidence.level} (${prediction35.confidence.percentage}%)</p>
+                        <p><strong>Recommendation:</strong> ${prediction35.recommendation.action} - ${prediction35.recommendation.message}</p>
+                        <p><strong>Change vs Recent Average:</strong> ${prediction35.comparison.netProfitChangePercent.toFixed(1)}%</p>
+                    </div>
+                `;
+
+                // Show debug information
+                results.innerHTML += `
+                    <div class="test-result info">
+                        <h3>Debug Information for POAS 2.5</h3>
+                        <pre>${JSON.stringify(prediction25, null, 2)}</pre>
+                    </div>
+                `;
+
+            } catch (error) {
+                results.innerHTML += `
+                    <div class="test-result error">
+                        <h3>Error</h3>
+                        <p>${error.message}</p>
+                        <pre>${error.stack}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        // Run tests when page loads
+        document.addEventListener('DOMContentLoaded', runTests);
+    </script>
+</body>
+</html>

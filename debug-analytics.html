@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug POAS Analytics</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .warning { background-color: #fff3cd; border-color: #ffeaa7; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+        button { padding: 10px 20px; margin: 5px; border: none; border-radius: 3px; cursor: pointer; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+    </style>
+</head>
+<body>
+    <h1>Debug POAS Analytics System</h1>
+    
+    <div class="debug-section">
+        <h3>Step 1: Load Data</h3>
+        <button class="btn-primary" onclick="loadAndTestData()">Load Data from API</button>
+        <div id="dataStatus">Not loaded</div>
+        <pre id="dataPreview"></pre>
+    </div>
+
+    <div class="debug-section">
+        <h3>Step 2: Initialize Analytics</h3>
+        <button class="btn-primary" onclick="initializeAnalytics()">Initialize Analytics System</button>
+        <div id="analyticsStatus">Not initialized</div>
+        <pre id="analyticsPreview"></pre>
+    </div>
+
+    <div class="debug-section">
+        <h3>Step 3: Test Prediction</h3>
+        <button class="btn-success" onclick="testPrediction()">Test POAS 2.4 Prediction</button>
+        <div id="predictionStatus">Not tested</div>
+        <pre id="predictionPreview"></pre>
+    </div>
+
+    <script src="analytics/poas-utils.js"></script>
+    <script src="analytics/poas-predictor.js"></script>
+    <script src="analytics/poas-analytics.js"></script>
+    <script>
+        let monthlyData = [];
+        let analytics = null;
+
+        async function loadAndTestData() {
+            try {
+                document.getElementById('dataStatus').innerHTML = '<span style="color: orange;">Loading...</span>';
+                
+                const response = await fetch('data.php');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const rawData = await response.json();
+                console.log('Raw data from API:', rawData);
+                
+                // Process data like the main app does
+                monthlyData = rawData.map(row => {
+                    const revenue = parseFloat(row.revenue) || 0;
+                    const grossprofit = parseFloat(row.grossprofit) || 0;
+                    const marketingSpend = parseFloat(row.marketingSpend || row.marknadsföring) || 0;
+                    
+                    // Calculate metrics
+                    const roas = marketingSpend ? revenue / marketingSpend : 0;
+                    const poas = marketingSpend ? grossprofit / marketingSpend : 0;
+                    const grossMarginPercent = revenue ? (grossprofit / revenue) * 100 : 0;
+                    const marketingPercent = revenue ? (marketingSpend / revenue) * 100 : 0;
+                    const netProfit = grossprofit - marketingSpend;
+                    const netProfitPercent = revenue ? (netProfit / revenue) * 100 : 0;
+                    const poasRoasRatio = roas ? poas / roas : 0;
+                    const breakevenROAS = grossprofit ? revenue / grossprofit : 0;
+
+                    return {
+                        month: row.month,
+                        revenue,
+                        grossprofit,
+                        marketingSpend,
+                        roas,
+                        poas,
+                        grossMarginPercent,
+                        marketingPercent,
+                        netProfit,
+                        netProfitPercent,
+                        poasRoasRatio,
+                        breakevenROAS
+                    };
+                });
+                
+                document.getElementById('dataStatus').innerHTML = `<span style="color: green;">✓ Loaded ${monthlyData.length} months of data</span>`;
+                
+                // Show preview of data
+                const preview = {
+                    totalMonths: monthlyData.length,
+                    firstMonth: monthlyData[0],
+                    lastMonth: monthlyData[monthlyData.length - 1],
+                    bestNetProfitMonth: monthlyData.reduce((best, current) => 
+                        current.netProfit > best.netProfit ? current : best
+                    )
+                };
+                
+                document.getElementById('dataPreview').textContent = JSON.stringify(preview, null, 2);
+                
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('dataStatus').innerHTML = `<span style="color: red;">✗ Error: ${error.message}</span>`;
+            }
+        }
+
+        async function initializeAnalytics() {
+            try {
+                document.getElementById('analyticsStatus').innerHTML = '<span style="color: orange;">Initializing...</span>';
+                
+                if (monthlyData.length === 0) {
+                    throw new Error('No data loaded. Load data first.');
+                }
+                
+                analytics = new POASAnalytics();
+                await analytics.initialize();
+                
+                document.getElementById('analyticsStatus').innerHTML = '<span style="color: green;">✓ Analytics initialized successfully</span>';
+                
+                const analysis = analytics.getAnalysis();
+                document.getElementById('analyticsPreview').textContent = JSON.stringify(analysis, null, 2);
+                
+            } catch (error) {
+                console.error('Error initializing analytics:', error);
+                document.getElementById('analyticsStatus').innerHTML = `<span style="color: red;">✗ Error: ${error.message}</span>`;
+                document.getElementById('analyticsPreview').textContent = error.stack;
+            }
+        }
+
+        async function testPrediction() {
+            try {
+                document.getElementById('predictionStatus').innerHTML = '<span style="color: orange;">Testing...</span>';
+                
+                if (!analytics || !analytics.isInitialized) {
+                    throw new Error('Analytics not initialized. Initialize analytics first.');
+                }
+                
+                const prediction = analytics.predictNetProfit(2.4);
+                
+                document.getElementById('predictionStatus').innerHTML = '<span style="color: green;">✓ Prediction completed</span>';
+                document.getElementById('predictionPreview').textContent = JSON.stringify(prediction, null, 2);
+                
+            } catch (error) {
+                console.error('Error testing prediction:', error);
+                document.getElementById('predictionStatus').innerHTML = `<span style="color: red;">✗ Error: ${error.message}</span>`;
+                document.getElementById('predictionPreview').textContent = error.stack;
+            }
+        }
+    </script>
+</body>
+</html>

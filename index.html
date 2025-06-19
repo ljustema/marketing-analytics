@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketing Analytics Dashboard - ROAS & POAS Optimization</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- POAS Analytics CSS -->
+    <link rel="stylesheet" href="analytics/poas-analytics.css">
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- Header -->
+        <header class="dashboard-header py-4 mb-4">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="h2 mb-0">
+                        <i class="fas fa-chart-line me-3"></i>
+                        Marketing Analytics Dashboard
+                    </h1>
+                    <p class="text-muted mb-0">ROAS & POAS Optimization Tool</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <!-- User Menu -->
+                    <div class="dropdown d-inline-block me-2">
+                        <button class="btn btn-outline-light dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown">
+                            <i class="fas fa-user me-2"></i><span id="currentUsername">Användare</span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><h6 class="dropdown-header">Inloggad som: <span id="userMenuName">-</span></h6></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" onclick="logout()">
+                                <i class="fas fa-sign-out-alt me-2"></i>Logga ut
+                            </a></li>
+                        </ul>
+                    </div>
+
+                    <button class="btn btn-outline-light me-2" onclick="toggleDarkMode()" id="themeToggle">
+                        <i class="fas fa-moon me-2"></i>Mörkt Läge
+                    </button>
+                    <button class="btn btn-outline-primary me-2" onclick="exportData()">
+                        <i class="fas fa-download me-2"></i>Exportera Data
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="clearAllData()">
+                        <i class="fas fa-trash me-2"></i>Rensa Data
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <ul class="nav nav-tabs dashboard-tabs mb-4" id="dashboardTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="analytics-tab" data-bs-toggle="tab" data-bs-target="#analytics" type="button" role="tab">
+                    <i class="fas fa-chart-area me-2"></i>Analytics Dashboard
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="data-manager-tab" data-bs-toggle="tab" data-bs-target="#data-manager" type="button" role="tab">
+                    <i class="fas fa-database me-2"></i>Data Manager
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="simulator-tab" data-bs-toggle="tab" data-bs-target="#simulator" type="button" role="tab">
+                    <i class="fas fa-calculator me-2"></i>POAS Simulator
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="predictive-analytics-tab" data-bs-toggle="tab" data-bs-target="#predictive-analytics" type="button" role="tab">
+                    <i class="fas fa-brain me-2"></i>Prediktiv Analys
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="formulas-tab" data-bs-toggle="tab" data-bs-target="#formulas" type="button" role="tab">
+                    <i class="fas fa-calculator me-2"></i>Formler
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="dashboardTabContent">
+            <!-- Analytics Dashboard Tab -->
+            <div class="tab-pane fade show active" id="analytics" role="tabpanel">
+                <!-- Main Chart - Full Width -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card chart-card main-chart">
+                            <div class="card-header">
+                                <div class="row align-items-center">
+                                    <div class="col-md-8">
+                                        <h5 class="card-title mb-0">
+                                            <i class="fas fa-chart-line me-2"></i>Huvudöversikt - Alla Metriker
+                                        </h5>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-bold mb-1">📅 Analysperiod:</label>
+                                        <select class="form-select form-select-sm" id="analysisPeriod">
+                                            <option value="all">Sedan start</option>
+                                            <option value="currentYear">Hittills detta året</option>
+                                            <option value="lastYear">Förra året</option>
+                                            <option value="last3Months">Senaste 3 månaderna</option>
+                                            <option value="last6Months">Senaste 6 månaderna</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body" style="height: 650px;">
+                                <div class="chart-controls mb-3">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-bold text-primary">📊 Nyckeltal:</label>
+                                            <div class="d-flex flex-column gap-1">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="showROAS" checked>
+                                                    <label class="form-check-label" for="showROAS">ROAS</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="showPOAS" checked>
+                                                    <label class="form-check-label" for="showPOAS">POAS</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="showMarketingShareOfGrossprofit">
+                                                    <label class="form-check-label" for="showMarketingShareOfGrossprofit">Marknadsföringens andel av bruttovinsten (%)</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="showNetProfitPerAdCrown">
+                                                    <label class="form-check-label" for="showNetProfitPerAdCrown">Nettovinst per annonskrona</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-bold text-warning">📈 Procent:</label>
+                                            <div class="d-flex flex-column gap-1">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="showgrossMarginPercent">
+                                                    <label class="form-check-label" for="showgrossMarginPercent">Bruttovinst % (Utan marknadsföring)</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="showNetProfitPercent">
+                                                    <label class="form-check-label" for="showNetProfitPercent">Nettovinst % (Med marknadsföring)</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="showMarketingPercent">
+                                                    <label class="form-check-label" for="showMarketingPercent">Marknadsföring %</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="showLostMargin">
+                                                    <label class="form-check-label" for="showLostMargin">Förlorad marginal (%)</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-bold text-success">💰 Belopp (SEK):</label>
+                                            <div class="d-flex flex-column gap-1">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="showrevenue">
+                                                    <label class="form-check-label" for="showrevenue">Omsättning SEK</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="showgrossprofit">
+                                                    <label class="form-check-label" for="showgrossprofit">Bruttovinst SEK</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="showMarknadsföring">
+                                                    <label class="form-check-label" for="showMarknadsföring">Marknadsföring SEK</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="showNettovinst">
+                                                    <label class="form-check-label" for="showNettovinst">Nettovinst SEK</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="height: 600px;">
+                                    <canvas id="trendsChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Metric Cards - Horizontal Layout -->
+                <div class="row mb-4">
+                    <div class="col-md-2">
+                        <div class="card metric-card h-100">
+                            <div class="card-body text-center py-3">
+                                <i class="fas fa-bullseye metric-icon text-primary"></i>
+                                <h6 class="card-title mb-1">Genomsnittlig ROAS</h6>
+                                <h4 class="metric-value mb-1" id="avgROAS">-</h4>
+                                <small class="text-muted d-block mb-1" id="roasExplanation">Medel ROAS per månad</small>
+                                <small class="text-info" id="roasComparison">-</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card metric-card h-100">
+                            <div class="card-body text-center py-3">
+                                <i class="fas fa-coins metric-icon text-success"></i>
+                                <h6 class="card-title mb-1">Genomsnittlig POAS</h6>
+                                <h4 class="metric-value mb-1" id="avgPOAS">-</h4>
+                                <small class="text-muted d-block mb-1" id="poasExplanation">Medel POAS per månad</small>
+                                <small class="text-info" id="poasComparison">-</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card metric-card h-100">
+                            <div class="card-body text-center py-3">
+                                <i class="fas fa-percentage metric-icon text-warning"></i>
+                                <h6 class="card-title mb-1">Genomsnittlig Bruttovinst %</h6>
+                                <h4 class="metric-value mb-1" id="avggrossMarginPercent">-</h4>
+                                <small class="text-muted d-block mb-1" id="grossMarginPercentExplanation">Medel bruttovinst % per månad</small>
+                                <small class="text-info" id="grossMarginPercentComparison">-</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card metric-card h-100">
+                            <div class="card-body text-center py-3">
+                                <i class="fas fa-chart-line metric-icon text-danger"></i>
+                                <h6 class="card-title mb-1">Genomsnittlig Nettovinst %</h6>
+                                <h4 class="metric-value mb-1" id="avgNetProfitPercent">-</h4>
+                                <small class="text-muted d-block mb-1" id="netProfitPercentExplanation">Medel nettovinst % per månad</small>
+                                <small class="text-info" id="netProfitPercentComparison">-</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card metric-card h-100">
+                            <div class="card-body text-center py-3">
+                                <i class="fas fa-chart-pie metric-icon text-info"></i>
+                                <h6 class="card-title mb-1">Genomsnittlig Marknadsföring %</h6>
+                                <h4 class="metric-value mb-1" id="avgMarketingPercent">-</h4>
+                                <small class="text-muted d-block mb-1" id="marketingPercentExplanation">Medel marknadsföring % per månad</small>
+                                <small class="text-info" id="marketingPercentComparison">-</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card metric-card h-100">
+                            <div class="card-body text-center py-3">
+                                <i class="fas fa-money-bill-wave metric-icon text-success"></i>
+                                <h6 class="card-title mb-1">Genomsnittlig Nettovinst</h6>
+                                <h4 class="metric-value mb-1" id="avgNetProfit">-</h4>
+                                <small class="text-muted d-block mb-1" id="netProfitExplanation">Medel nettovinst per månad i SEK</small>
+                                <small class="text-info" id="netProfitComparison">-</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Second Row of Metric Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-2">
+                        <div class="card metric-card h-100">
+                            <div class="card-body text-center py-3">
+                                <i class="fas fa-chart-line metric-icon text-primary"></i>
+                                <h6 class="card-title mb-1">Genomsnittlig Omsättning</h6>
+                                <h4 class="metric-value mb-1" id="avgRevenue">-</h4>
+                                <small class="text-muted d-block mb-1" id="revenueExplanation">Medel försäljning per månad i SEK</small>
+                                <small class="text-info" id="revenueComparison">-</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card metric-card h-100">
+                            <div class="card-body text-center py-3">
+                                <i class="fas fa-coins metric-icon text-success"></i>
+                                <h6 class="card-title mb-1">Genomsnittlig Bruttovinst</h6>
+                                <h4 class="metric-value mb-1" id="avgGrossprofit">-</h4>
+                                <small class="text-muted d-block mb-1" id="grossprofitExplanation">Medel bruttovinst per månad i SEK</small>
+                                <small class="text-info" id="grossprofitComparison">-</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card metric-card h-100">
+                            <div class="card-body text-center py-3">
+                                <i class="fas fa-bullhorn metric-icon text-warning"></i>
+                                <h6 class="card-title mb-1">Genomsnittlig Marknadsföring</h6>
+                                <h4 class="metric-value mb-1" id="avgMarketingSpend">-</h4>
+                                <small class="text-muted d-block mb-1" id="marketingSpendExplanation">Medel marknadsföringskostnad per månad i SEK</small>
+                                <small class="text-info" id="marketingSpendComparison">-</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card metric-card h-100">
+                            <div class="card-body text-center py-3">
+                                <i class="fas fa-exclamation-triangle metric-icon text-danger"></i>
+                                <h6 class="card-title mb-1">Genomsnittlig Förlorad marginal</h6>
+                                <h4 class="metric-value mb-1" id="avgLostMargin">-</h4>
+                                <small class="text-muted d-block mb-1" id="lostMarginExplanation">Medel förlorad marginal % per månad</small>
+                                <small class="text-info" id="lostMarginComparison">-</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card metric-card h-100">
+                            <div class="card-body text-center py-3">
+                                <i class="fas fa-percentage metric-icon text-purple"></i>
+                                <h6 class="card-title mb-1">Genomsnittlig Marknadsföringens andel av bruttovinsten</h6>
+                                <h4 class="metric-value mb-1" id="avgMarketingShareOfGrossprofit">-</h4>
+                                <small class="text-muted d-block mb-1" id="marketingShareOfGrossprofitExplanation">Medel marknadsföringens andel av bruttovinsten % per månad</small>
+                                <small class="text-info" id="marketingShareOfGrossprofitComparison">-</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card metric-card h-100">
+                            <div class="card-body text-center py-3">
+                                <i class="fas fa-chart-line metric-icon text-info"></i>
+                                <h6 class="card-title mb-1">Genomsnittlig Nettovinst per annonskrona</h6>
+                                <h4 class="metric-value mb-1" id="avgNetProfitPerAdCrown">-</h4>
+                                <small class="text-muted d-block mb-1" id="netProfitPerAdCrownExplanation">Medel nettovinst per annonskrona per månad</small>
+                                <small class="text-info" id="netProfitPerAdCrownComparison">-</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Individual Metric Charts -->
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        <div class="card chart-card metric-chart">
+                            <div class="card-header pb-2">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-bullseye me-2"></i>ROAS Trend
+                                </h5>
+                                <small class="text-muted">Return on Ad Spend: Omsättning SEK ÷ Marknadsföring SEK</small>
+                            </div>
+                            <div class="card-body pt-2">
+                                <canvas id="roasChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <div class="card chart-card metric-chart">
+                            <div class="card-header pb-2">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-coins me-2"></i>POAS Trend
+                                </h5>
+                                <small class="text-muted">Profit on Ad Spend: Bruttovinst SEK ÷ Marknadsföring SEK</small>
+                            </div>
+                            <div class="card-body pt-2">
+                                <canvas id="poasChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <div class="card chart-card metric-chart">
+                            <div class="card-header pb-2">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-percentage me-2"></i>Bruttovinst % (Utan marknadsföring)
+                                </h5>
+                                <small class="text-muted">Bruttovinst %: (Bruttovinst SEK ÷ Omsättning SEK) × 100</small>
+                            </div>
+                            <div class="card-body pt-2">
+                                <canvas id="grossMarginPercentChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <div class="card chart-card metric-chart">
+                            <div class="card-header pb-2">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-chart-line me-2"></i>Nettovinst % (Med marknadsföring)
+                                </h5>
+                                <small class="text-muted">Nettovinst %: ((Bruttovinst SEK - Marknadsföring SEK) ÷ Omsättning SEK) × 100</small>
+                            </div>
+                            <div class="card-body pt-2">
+                                <canvas id="netProfitPercentChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <div class="card chart-card metric-chart">
+                            <div class="card-header pb-2">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-money-bill-wave me-2"></i>Bruttovinst SEK (Utan marknadsföring)
+                                </h5>
+                                <small class="text-muted">Omsättning - Varukostnad - Fraktkostnad - Betalnings och Packningskostnader i SEK</small>
+                            </div>
+                            <div class="card-body pt-2">
+                                <canvas id="grossprofitChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <div class="card chart-card metric-chart">
+                            <div class="card-header pb-2">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-money-bill-wave me-2"></i>Nettovinst SEK (Med marknadsföring)
+                                </h5>
+                                <small class="text-muted">Bruttovinst SEK - Marknadsföring SEK</small>
+                            </div>
+                            <div class="card-body pt-2">
+                                <canvas id="nettovinstChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <div class="card chart-card metric-chart">
+                            <div class="card-header pb-2">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-chart-pie me-2"></i>Marknadsföring %
+                                </h5>
+                                <small class="text-muted">Marknadsföring %: (Marknadsföring SEK ÷ Omsättning SEK) × 100</small>
+                            </div>
+                            <div class="card-body pt-2">
+                                <canvas id="marketingPercentChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <div class="card chart-card metric-chart">
+                            <div class="card-header pb-2">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-bullhorn me-2"></i>Marknadsföring SEK
+                                </h5>
+                                <small class="text-muted">Total kostnad för marknadsföring i SEK</small>
+                            </div>
+                            <div class="card-body pt-2">
+                                <canvas id="marketingSpendChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <div class="card chart-card metric-chart">
+                            <div class="card-header pb-2">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-chart-line me-2"></i>Omsättning SEK
+                                </h5>
+                                <small class="text-muted">Total försäljning i SEK</small>
+                            </div>
+                            <div class="card-body pt-2">
+                                <canvas id="revenueChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 mb-2">
+                        <div class="card chart-card metric-chart">
+                            <div class="card-header pb-2">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-chart-line-down me-2"></i>Förlorad marginal (ROAS – POAS %)
+                                </h5>
+                                <small class="text-muted">((ROAS – POAS) ÷ ROAS) × 100<br>Visar hur stor andel av intäkterna som försvinner i varukostnad, frakt, packning och andra direkta kostnader – alltså skillnaden mellan omsättningen och den verkliga bruttovinsten per annonskrona. Lägre värde är bättre.</small>
+                            </div>
+                            <div class="card-body pt-2">
+                                <canvas id="lostMarginChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <div class="card chart-card metric-chart">
+                            <div class="card-header pb-2">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-percentage me-2"></i>Marknadsföringens andel av bruttovinsten
+                                </h5>
+                                <small class="text-muted">(Marknadsföring SEK ÷ Bruttovinst SEK) × 100<br>Visar hur stor andel av bruttovinsten som förbrukas av marknadsföring varje månad. Ett högt värde innebär att en större del av din vinst går åt till annonsering.</small>
+                            </div>
+                            <div class="card-body pt-2">
+                                <canvas id="marketingShareOfGrossprofitChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <div class="card chart-card metric-chart">
+                            <div class="card-header pb-2">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-chart-line me-2"></i>Nettovinst per annonskrona
+                                </h5>
+                                <small class="text-muted">Nettovinst SEK ÷ Marknadsföring SEK<br>Visar hur mycket nettovinst du får per satsad marknadsföringskrona – direkt mått på lönsamhet.</small>
+                            </div>
+                            <div class="card-body pt-2">
+                                <canvas id="netProfitPerAdCrownChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Manager Tab -->
+            <div class="tab-pane fade" id="data-manager" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-plus me-2"></i>Lägg till Månadsdata
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="dataForm">
+                                    <div class="mb-3">
+                                        <label for="monthInput" class="form-label">Månad</label>
+                                        <input type="month" class="form-control" id="monthInput" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="revenueInput" class="form-label">Omsättning (SEK)</label>
+                                        <input type="number" class="form-control" id="revenueInput" min="0" step="0.01" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="grossprofitInput" class="form-label">Bruttovinst (SEK)</label>
+                                        <input type="number" class="form-control" id="grossprofitInput" min="0" step="0.01" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="marketingSpendInput" class="form-label">Marknadsföring (SEK)</label>
+                                        <input type="number" class="form-control" id="marketingSpendInput" min="0" step="0.01" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="fas fa-save me-2"></i>Spara Data
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-sliders-h me-2"></i>Tröskelvärden
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="thresholdForm">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">ROAS Tröskelvärden</label>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <label for="roasThresholdLow" class="form-label text-muted">Låg (varning)</label>
+                                                <input type="number" class="form-control" id="roasThresholdLow" min="0" step="0.1" value="1.5">
+                                            </div>
+                                            <div class="col-6">
+                                                <label for="roasThresholdHigh" class="form-label text-muted">Hög (bra)</label>
+                                                <input type="number" class="form-control" id="roasThresholdHigh" min="0" step="0.1" value="2.0">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">POAS Tröskelvärden</label>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <label for="poasThresholdLow" class="form-label text-muted">Låg (varning)</label>
+                                                <input type="number" class="form-control" id="poasThresholdLow" min="0" step="0.1" value="1.0">
+                                            </div>
+                                            <div class="col-6">
+                                                <label for="poasThresholdHigh" class="form-label text-muted">Hög (bra)</label>
+                                                <input type="number" class="form-control" id="poasThresholdHigh" min="0" step="0.1" value="1.5">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Bruttovinst Tröskelvärden (%)</label>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <label for="grossMarginPercentThresholdLow" class="form-label text-muted">Låg (varning)</label>
+                                                <input type="number" class="form-control" id="grossMarginPercentThresholdLow" min="0" max="100" step="1" value="15">
+                                            </div>
+                                            <div class="col-6">
+                                                <label for="grossMarginPercentThresholdHigh" class="form-label text-muted">Hög (bra)</label>
+                                                <input type="number" class="form-control" id="grossMarginPercentThresholdHigh" min="0" max="100" step="1" value="20">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Nettovinst % Tröskelvärden</label>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <label for="netProfitPercentThresholdLow" class="form-label text-muted">Låg (varning)</label>
+                                                <input type="number" class="form-control" id="netProfitPercentThresholdLow" min="0" max="100" step="1" value="5">
+                                            </div>
+                                            <div class="col-6">
+                                                <label for="netProfitPercentThresholdHigh" class="form-label text-muted">Hög (bra)</label>
+                                                <input type="number" class="form-control" id="netProfitPercentThresholdHigh" min="0" max="100" step="1" value="10">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Marknadsföring % Tröskelvärden</label>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <label for="marketingPercentThresholdLow" class="form-label text-muted">Låg (bra)</label>
+                                                <input type="number" class="form-control" id="marketingPercentThresholdLow" min="0" max="100" step="1" value="10">
+                                            </div>
+                                            <div class="col-6">
+                                                <label for="marketingPercentThresholdHigh" class="form-label text-muted">Hög (varning)</label>
+                                                <input type="number" class="form-control" id="marketingPercentThresholdHigh" min="0" max="100" step="1" value="15">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <hr class="my-4">
+                                    <h6 class="text-muted mb-3">Intäktströsklar (SEK)</h6>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Omsättning Tröskelvärden (SEK)</label>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <label for="revenueThresholdLow" class="form-label text-muted">Låg (varning)</label>
+                                                <input type="number" class="form-control" id="revenueThresholdLow" min="0" step="1000" value="50000">
+                                            </div>
+                                            <div class="col-6">
+                                                <label for="revenueThresholdHigh" class="form-label text-muted">Hög (bra)</label>
+                                                <input type="number" class="form-control" id="revenueThresholdHigh" min="0" step="1000" value="100000">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Bruttovinst Tröskelvärden (SEK)</label>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <label for="grossprofitThresholdLow" class="form-label text-muted">Låg (varning)</label>
+                                                <input type="number" class="form-control" id="grossprofitThresholdLow" min="0" step="1000" value="25000">
+                                            </div>
+                                            <div class="col-6">
+                                                <label for="grossprofitThresholdHigh" class="form-label text-muted">Hög (bra)</label>
+                                                <input type="number" class="form-control" id="grossprofitThresholdHigh" min="0" step="1000" value="50000">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Marknadsföring Tröskelvärden (SEK)</label>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <label for="marketingSpendThresholdLow" class="form-label text-muted">Låg (bra)</label>
+                                                <input type="number" class="form-control" id="marketingSpendThresholdLow" min="0" step="1000" value="10000">
+                                            </div>
+                                            <div class="col-6">
+                                                <label for="marketingSpendThresholdHigh" class="form-label text-muted">Hög (varning)</label>
+                                                <input type="number" class="form-control" id="marketingSpendThresholdHigh" min="0" step="1000" value="25000">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Nettovinst Tröskelvärden (SEK)</label>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <label for="nettovinstThresholdLow" class="form-label text-muted">Låg (varning)</label>
+                                                <input type="number" class="form-control" id="nettovinstThresholdLow" min="0" step="1000" value="15000">
+                                            </div>
+                                            <div class="col-6">
+                                                <label for="nettovinstThresholdHigh" class="form-label text-muted">Hög (bra)</label>
+                                                <input type="number" class="form-control" id="nettovinstThresholdHigh" min="0" step="1000" value="30000">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Förlorad marginal Tröskelvärden (%)</label>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <label for="lostMarginThresholdLow" class="form-label text-muted">Låg (bra)</label>
+                                                <input type="number" class="form-control" id="lostMarginThresholdLow" min="0" max="100" step="1" value="70">
+                                            </div>
+                                            <div class="col-6">
+                                                <label for="lostMarginThresholdHigh" class="form-label text-muted">Hög (varning)</label>
+                                                <input type="number" class="form-control" id="lostMarginThresholdHigh" min="0" max="100" step="1" value="80">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Marknadsföringens andel av bruttovinsten Tröskelvärden (%)</label>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <label for="marketingShareOfGrossprofitThresholdLow" class="form-label text-muted">Låg (bra)</label>
+                                                <input type="number" class="form-control" id="marketingShareOfGrossprofitThresholdLow" min="0" max="100" step="1" value="30">
+                                            </div>
+                                            <div class="col-6">
+                                                <label for="marketingShareOfGrossprofitThresholdHigh" class="form-label text-muted">Hög (varning)</label>
+                                                <input type="number" class="form-control" id="marketingShareOfGrossprofitThresholdHigh" min="0" max="100" step="1" value="50">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Nettovinst per annonskrona Tröskelvärden</label>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <label for="netProfitPerAdCrownThresholdLow" class="form-label text-muted">Låg (varning)</label>
+                                                <input type="number" class="form-control" id="netProfitPerAdCrownThresholdLow" min="0" step="0.1" value="0.5">
+                                            </div>
+                                            <div class="col-6">
+                                                <label for="netProfitPerAdCrownThresholdHigh" class="form-label text-muted">Hög (bra)</label>
+                                                <input type="number" class="form-control" id="netProfitPerAdCrownThresholdHigh" min="0" step="0.1" value="1.0">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-secondary w-100">
+                                        <i class="fas fa-check me-2"></i>Uppdatera Tröskelvärden
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-table me-2"></i>Månadsdata Översikt
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-striped" id="dataTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Månad</th>
+                                                <th>Omsättning</th>
+                                                <th>Bruttovinst</th>
+                                                <th>Marknadsföring</th>
+                                                <th>ROAS</th>
+                                                <th>POAS</th>
+                                                <th>Bruttovinst %</th>
+                                                <th>Marknadsföring %</th>
+                                                <th>Åtgärder</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                                <div id="noDataMessage" class="text-center text-muted py-4" style="display: none;">
+                                    <i class="fas fa-inbox fa-3x mb-3"></i>
+                                    <h5>Ingen data tillgänglig</h5>
+                                    <p>Lägg till månadsdata för att se beräkningar och analyser.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- POAS Simulator Tab -->
+            <div class="tab-pane fade" id="simulator" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-calculator me-2"></i>Simulator Inställningar
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="simulatorForm">
+                                    <div class="mb-3">
+                                        <label for="currentrevenue" class="form-label">Nuvarande Omsättning (SEK)</label>
+                                        <input type="number" class="form-control" id="currentrevenue" min="0" step="0.01">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="currentgrossprofit" class="form-label">Nuvarande Bruttovinst (SEK)</label>
+                                        <input type="number" class="form-control" id="currentgrossprofit" min="0" step="0.01">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="currentMarknadsföring" class="form-label">Nuvarande Marknadsföring (SEK)</label>
+                                        <input type="number" class="form-control" id="currentMarknadsföring" min="0" step="0.01">
+                                    </div>
+                                    <hr>
+                                    <div class="mb-3">
+                                        <label for="targetROAS" class="form-label">Mål ROAS</label>
+                                        <input type="number" class="form-control" id="targetROAS" min="0" step="0.1" value="3.0">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="targetPOAS" class="form-label">Mål POAS</label>
+                                        <input type="number" class="form-control" id="targetPOAS" min="0" step="0.1" value="2.0">
+                                    </div>
+                                    <button type="button" class="btn btn-primary w-100" onclick="runSimulation()">
+                                        <i class="fas fa-play me-2"></i>Kör Simulering
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-chart-bar me-2"></i>Simuleringsresultat
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="simulationResults" style="display: none;">
+                                    <div class="row mb-4">
+                                        <div class="col-md-6">
+                                            <div class="card bg-light">
+                                                <div class="card-body text-center">
+                                                    <h6 class="card-title">Rekommenderad Marknadsföring (ROAS)</h6>
+                                                    <h4 class="text-primary" id="recommendedMarketingROAS">-</h4>
+                                                    <small class="text-muted">För att uppnå mål ROAS</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="card bg-light">
+                                                <div class="card-body text-center">
+                                                    <h6 class="card-title">Rekommenderad Marknadsföring (POAS)</h6>
+                                                    <h4 class="text-success" id="recommendedMarketingPOAS">-</h4>
+                                                    <small class="text-muted">För att uppnå mål POAS</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <canvas id="simulationChart"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="simulationPlaceholder" class="text-center text-muted py-5">
+                                    <i class="fas fa-chart-line fa-3x mb-3"></i>
+                                    <h5>Simuleringsresultat</h5>
+                                    <p>Fyll i nuvarande data och målvärden, klicka sedan på "Kör Simulering" för att se rekommendationer.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Predictive Analytics Tab -->
+            <div class="tab-pane fade" id="predictive-analytics" role="tabpanel">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-brain me-2"></i>POAS Prediktiv Analys
+                                </h5>
+                                <p class="text-muted mb-0">Avancerad analys för att svara: "Får vi mer nettovinst i SEK om vi sänker POAS lite?"</p>
+                            </div>
+                            <div class="card-body">
+                                <!-- Analytics Status -->
+                                <div id="analyticsStatus" class="alert alert-info">
+                                    <i class="fas fa-spinner fa-spin me-2"></i>Initialiserar analysmotor...
+                                </div>
+
+                                <!-- Quick Analysis Summary -->
+                                <div id="quickAnalysis" class="mb-4" style="display: none;">
+                                    <div class="row g-3">
+                                        <div class="col-3">
+                                            <div class="card bg-light h-100">
+                                                <div class="card-body text-center py-2">
+                                                    <h6 class="card-title mb-1" style="font-size: 0.9rem;">Historisk Data</h6>
+                                                    <h4 id="totalMonths" class="text-primary mb-1">-</h4>
+                                                    <small class="text-muted">månader analyserade</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="card bg-light h-100">
+                                                <div class="card-body text-center py-2">
+                                                    <h6 class="card-title mb-1" style="font-size: 0.9rem;">Nuvarande Snitt POAS</h6>
+                                                    <h4 id="currentAvgPOAS" class="text-success mb-1">-</h4>
+                                                    <small class="text-muted">senaste 6 månaderna</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="card bg-light h-100">
+                                                <div class="card-body text-center py-2">
+                                                    <h6 class="card-title mb-1" style="font-size: 0.9rem;">Optimal POAS Intervall</h6>
+                                                    <h4 id="optimalPOASRange" class="text-warning mb-1">-</h4>
+                                                    <small class="text-muted">högsta nettovinst</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="card bg-light h-100">
+                                                <div class="card-body text-center py-2">
+                                                    <h6 class="card-title mb-1" style="font-size: 0.9rem;">POAS Trend</h6>
+                                                    <h4 id="poasTrend" class="text-info mb-1">-</h4>
+                                                    <small class="text-muted">riktning & styrka</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- POAS Optimizer -->
+                                <div id="poasOptimizer" style="display: none;">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h6 class="card-title mb-0">
+                                                        <i class="fas fa-sliders-h me-2"></i>POAS Måloptimering
+                                                    </h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="mb-3">
+                                                        <label for="poasSlider" class="form-label">Mål POAS: <span id="poasSliderValue">3.0</span></label>
+                                                        <input type="range" class="form-range" id="poasSlider" min="1.5" max="5.0" step="0.1" value="3.0">
+                                                        <div class="d-flex justify-content-between">
+                                                            <small class="text-muted">1.5</small>
+                                                            <small class="text-muted">5.0</small>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="mb-3">
+                                                        <button type="button" class="btn btn-primary w-100" id="predictButton">
+                                                            <i class="fas fa-magic me-2"></i>Förutsäg Nettovinst
+                                                        </button>
+                                                    </div>
+
+                                                    <div id="predictionStatus" class="alert alert-secondary" style="display: none;">
+                                                        <i class="fas fa-spinner fa-spin me-2"></i>Beräknar förutsägelse...
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-8">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h6 class="card-title mb-0">
+                                                        <i class="fas fa-chart-line me-2"></i>Förutsägelseresultat
+                                                    </h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div id="predictionResults" style="display: none;">
+                                                        <!-- Prediction cards will be inserted here -->
+                                                    </div>
+                                                    <div id="predictionPlaceholder" class="text-center text-muted py-5">
+                                                        <i class="fas fa-magic fa-3x mb-3"></i>
+                                                        <h5>Förutsägelseresultat</h5>
+                                                        <p>Justera POAS-målreglaget och klicka på "Förutsäg Nettovinst" för att se avancerad analys.</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Advanced Charts Section -->
+                                <div id="advancedCharts" class="mt-4" style="display: none;">
+                                    <div class="row">
+                                        <div class="col-12 mb-4">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h6 class="card-title mb-0">
+                                                        <i class="fas fa-chart-area me-2"></i>POAS Optimeringsanalys
+                                                    </h6>
+                                                </div>
+                                                <div class="card-body" style="height: 400px;">
+                                                    <canvas id="poasOptimizationChart"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-4">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h6 class="card-title mb-0">
+                                                        <i class="fas fa-balance-scale me-2"></i>Scenariojämförelse
+                                                    </h6>
+                                                </div>
+                                                <div class="card-body" style="height: 350px;">
+                                                    <canvas id="scenarioComparisonChart"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-4">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h6 class="card-title mb-0">
+                                                        <i class="fas fa-history me-2"></i>Historiska Mönster
+                                                    </h6>
+                                                </div>
+                                                <div class="card-body" style="height: 350px;">
+                                                    <canvas id="historicalPatternChart"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Debug Information -->
+                                <div id="debugInfo" class="mt-4" style="display: none;">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="card-title mb-0">
+                                                <i class="fas fa-bug me-2"></i>Debug Information
+                                            </h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <pre id="debugOutput" class="bg-light p-3" style="font-size: 12px; max-height: 300px; overflow-y: auto;"></pre>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Manual initialization button for debugging -->
+                                <div class="mt-3">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="window.poasInterface.initialize()">
+                                        <i class="fas fa-sync me-2"></i>Manuell initialisering (om det fastnar)
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulas Reference Tab -->
+            <div class="tab-pane fade" id="formulas" role="tabpanel">
+                <div class="card">
+                    <div class="card-header py-2">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-calculator me-2"></i>Formelreferens
+                        </h5>
+                    </div>
+                    <div class="card-body py-2">
+                        <div class="row">
+                            <!-- Column 1: 📊 Nyckeltal -->
+                            <div class="col-md-4">
+                                <div class="formula-group">
+                                    <h6 class="fw-bold text-primary mb-2">
+                                        <i class="fas fa-chart-bar me-1"></i>📊 Nyckeltal
+                                    </h6>
+                                    <div class="formula-item mb-1">
+                                        <strong>ROAS</strong><br>
+                                        <code>Omsättning ÷ Marknadsföring</code><br>
+                                        <small><strong>Vad det mäter:</strong> Omsättning per marknadsföringskrona.<br>
+                                        <span class="threshold-text" data-metric="roas"></span></small>
+                                    </div>
+                                    <div class="formula-item mb-1">
+                                        <strong>POAS</strong><br>
+                                        <code>Bruttovinst ÷ Marknadsföring</code><br>
+                                        <small><strong>Vad det mäter:</strong> Bruttovinst per marknadsföringskrona.<br>
+                                        <span class="threshold-text" data-metric="poas"></span></small>
+                                    </div>
+                                    <div class="formula-item mb-1">
+                                        <strong>Marknadsföringens andel av bruttovinsten (%)</strong><br>
+                                        <code>(Marknadsföring ÷ Bruttovinst) × 100</code><br>
+                                        <small><strong>Vad det mäter:</strong> Hur stor del av bruttovinsten som går till marknadsföring.<br>
+                                        <span class="threshold-text" data-metric="marketingShareOfGrossprofit"></span></small>
+                                    </div>
+                                    <div class="formula-item mb-1">
+                                        <strong>Nettovinst per annonskrona</strong><br>
+                                        <code>(Bruttovinst - Marknadsföring) ÷ Marknadsföring</code><br>
+                                        <small><strong>Vad det mäter:</strong> Nettovinst per satsad marknadsföringskrona.<br>
+                                        <span class="threshold-text" data-metric="netProfitPerAdCrown"></span></small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Column 2: 📈 Procent -->
+                            <div class="col-md-4">
+                                <div class="formula-group">
+                                    <h6 class="fw-bold text-warning mb-2">
+                                        <i class="fas fa-percentage me-1"></i>📈 Procent
+                                    </h6>
+                                    <div class="formula-item mb-1">
+                                        <strong>Bruttovinst % (Utan marknadsföring)</strong><br>
+                                        <code>(Bruttovinst ÷ Omsättning) × 100</code><br>
+                                        <small><strong>Vad det mäter:</strong> Andel av omsättningen som blir bruttovinst.<br>
+                                        <span class="threshold-text" data-metric="grossMarginPercent"></span></small>
+                                    </div>
+                                    <div class="formula-item mb-1">
+                                        <strong>Nettovinst % (Med marknadsföring)</strong><br>
+                                        <code>((Bruttovinst - Marknadsföring) ÷ Omsättning) × 100</code><br>
+                                        <small><strong>Vad det mäter:</strong> Andel av omsättningen som blir nettovinst.<br>
+                                        <span class="threshold-text" data-metric="netProfitPercent"></span></small>
+                                    </div>
+                                    <div class="formula-item mb-1">
+                                        <strong>Marknadsföring %</strong><br>
+                                        <code>(Marknadsföring ÷ Omsättning) × 100</code><br>
+                                        <small><strong>Vad det mäter:</strong> Andel av omsättningen som går till marknadsföring.<br>
+                                        <span class="threshold-text" data-metric="marketingPercent"></span></small>
+                                    </div>
+                                    <div class="formula-item mb-1">
+                                        <strong>Förlorad marginal (%)</strong><br>
+                                        <code>((ROAS - POAS) ÷ ROAS) × 100</code><br>
+                                        <small><strong>Vad det mäter:</strong> Andel av intäkterna som "försvinner" i varukostnad.<br>
+                                        <span class="threshold-text" data-metric="lostMargin"></span></small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Column 3: 💰 Belopp (SEK) -->
+                            <div class="col-md-4">
+                                <div class="formula-group">
+                                    <h6 class="fw-bold text-success mb-2">
+                                        <i class="fas fa-coins me-1"></i>💰 Belopp (SEK)
+                                    </h6>
+                                    <div class="formula-item mb-1">
+                                        <strong>Omsättning SEK</strong><br>
+                                        <code>Manuell inmatning</code><br>
+                                        <small><strong>Vad det mäter:</strong> Total försäljning för månaden.<br>
+                                        <span class="threshold-text" data-metric="revenue"></span></small>
+                                    </div>
+                                    <div class="formula-item mb-1">
+                                        <strong>Bruttovinst SEK</strong><br>
+                                        <code>Manuell inmatning</code><br>
+                                        <small><strong>Vad det mäter:</strong> Omsättning minus varukostnad.<br>
+                                        <span class="threshold-text" data-metric="grossprofit"></span></small>
+                                    </div>
+                                    <div class="formula-item mb-1">
+                                        <strong>Marknadsföring SEK</strong><br>
+                                        <code>Manuell inmatning</code><br>
+                                        <small><strong>Vad det mäter:</strong> Total marknadsföringskostnad.<br>
+                                        <span class="threshold-text" data-metric="marketingSpend"></span></small>
+                                    </div>
+                                    <div class="formula-item mb-1">
+                                        <strong>Nettovinst SEK</strong><br>
+                                        <code>Bruttovinst - Marknadsföring</code><br>
+                                        <small><strong>Vad det mäter:</strong> Faktisk vinst efter marknadsföringskostnader.<br>
+                                        <span class="threshold-text" data-metric="nettovinst"></span></small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- POAS Analytics Scripts -->
+    <script src="analytics/poas-utils.js"></script>
+    <script src="analytics/poas-predictor.js"></script>
+    <script src="analytics/poas-analytics.js"></script>
+    <script src="analytics/poas-charts.js"></script>
+    <script src="analytics/poas-interface.js"></script>
+    <!-- Custom JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
+
+

@@ -1,0 +1,34 @@
+# User data files
+data/*.csv
+data/*.json
+users/*/
+
+# Temporary files
+*.tmp
+*.log
+
+# IDE files
+.vscode/
+*.code-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# PHP temporary files
+*.php~
+
+# Backup files
+*.bak
+*.backup
+
+# Environment files
+.env
+.env.local
+
+# Node modules (if any)
+node_modules/
+
+# Logs
+logs/
+*.log

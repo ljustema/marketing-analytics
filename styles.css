@@ -1,0 +1,569 @@
+:root {
+    --primary-color: 210 79% 46%; /* #2563eb */
+    --secondary-color: 217 19% 35%; /* #475569 */
+    --success-color: 142 76% 36%; /* #16a34a */
+    --warning-color: 43 96% 56%; /* #eab308 */
+    --info-color: 199 89% 48%; /* #0ea5e9 */
+    --background: 210 11% 98%; /* #f8fafc */
+    --surface: 0 0% 100%; /* #ffffff */
+    --border: 214 13% 91%; /* #e2e8f0 */
+    --text-primary: 222 84% 5%; /* #0f172a */
+    --text-secondary: 215 16% 47%; /* #64748b */
+    --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+[data-theme="dark"] {
+    --primary-color: 210 79% 56%; /* #3b82f6 */
+    --secondary-color: 217 19% 45%; /* #64748b */
+    --success-color: 142 76% 46%; /* #22c55e */
+    --warning-color: 43 96% 66%; /* #fbbf24 */
+    --info-color: 199 89% 58%; /* #38bdf8 */
+    --background: 222 84% 5%; /* #0f172a */
+    --surface: 215 28% 17%; /* #1e293b */
+    --border: 215 14% 34%; /* #475569 */
+    --text-primary: 210 40% 98%; /* #f8fafc */
+    --text-secondary: 215 20% 65%; /* #94a3b8 */
+    --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+}
+
+body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--text-primary));
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+}
+
+/* Header Styles */
+.dashboard-header {
+    background: linear-gradient(135deg, hsl(var(--primary-color)) 0%, hsl(var(--info-color)) 100%);
+    color: white;
+    border-radius: 0.75rem;
+    margin: 1rem 0;
+    padding: 2rem 1.5rem;
+    box-shadow: var(--shadow-lg);
+}
+
+.dashboard-header h1 {
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+.dashboard-header .text-muted {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.dashboard-header .btn {
+    border-color: rgba(255, 255, 255, 0.3);
+    color: white;
+}
+
+.dashboard-header .btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Tab Navigation */
+.dashboard-tabs {
+    border-bottom: 2px solid hsl(var(--border));
+    margin-bottom: 2rem;
+}
+
+.dashboard-tabs .nav-link {
+    border: none;
+    border-radius: 0.5rem 0.5rem 0 0;
+    padding: 1rem 1.5rem;
+    font-weight: 500;
+    color: hsl(var(--text-secondary));
+    transition: all 0.3s ease;
+    margin-right: 0.5rem;
+}
+
+.dashboard-tabs .nav-link:hover {
+    background-color: hsl(var(--background));
+    color: hsl(var(--primary-color));
+}
+
+.dashboard-tabs .nav-link.active {
+    background-color: hsl(var(--primary-color));
+    color: white;
+    border-bottom: 2px solid hsl(var(--primary-color));
+}
+
+/* Card Styles */
+.card {
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow);
+    transition: box-shadow 0.3s ease;
+    margin-bottom: 1.5rem;
+}
+
+.card:hover {
+    box-shadow: var(--shadow-lg);
+}
+
+.card-header {
+    background-color: hsl(var(--surface));
+    border-bottom: 1px solid hsl(var(--border));
+    border-radius: 0.75rem 0.75rem 0 0 !important;
+    padding: 1rem 1.5rem;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Chart Card */
+.chart-card {
+    min-height: 600px;
+}
+
+.chart-card.main-chart {
+    min-height: 950px;
+}
+
+.chart-card.metric-chart {
+    min-height: 500px;
+    max-height: 600px;
+    overflow: hidden;
+}
+
+.chart-controls {
+    background-color: hsl(var(--background));
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid hsl(var(--border));
+}
+
+/* Metric Cards */
+.metric-card {
+    background: linear-gradient(135deg, hsl(var(--surface)) 0%, hsl(var(--background)) 100%);
+    border: 1px solid hsl(var(--border));
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.metric-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.metric-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0;
+    color: hsl(var(--text-primary));
+}
+
+.metric-card .card-title {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: hsl(var(--text-secondary));
+    margin-bottom: 0.5rem;
+}
+
+/* Form Styles */
+.form-control {
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: hsl(var(--primary-color));
+    box-shadow: 0 0 0 0.2rem hsla(var(--primary-color) / 0.25);
+}
+
+.form-label {
+    font-weight: 500;
+    color: hsl(var(--text-primary));
+    margin-bottom: 0.5rem;
+}
+
+/* Button Styles */
+.btn {
+    border-radius: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background-color: hsl(var(--primary-color));
+    border-color: hsl(var(--primary-color));
+}
+
+.btn-primary:hover {
+    background-color: hsl(var(--primary-color) / 0.9);
+    border-color: hsl(var(--primary-color) / 0.9);
+    transform: translateY(-1px);
+}
+
+.btn-success {
+    background-color: hsl(var(--success-color));
+    border-color: hsl(var(--success-color));
+}
+
+.btn-warning {
+    background-color: hsl(var(--warning-color));
+    border-color: hsl(var(--warning-color));
+    color: hsl(var(--text-primary));
+}
+
+.btn-danger {
+    background-color: hsl(0 84% 60%); /* #ef4444 */
+    border-color: hsl(0 84% 60%);
+}
+
+/* Table Styles */
+.table {
+    margin-bottom: 0;
+}
+
+.table th {
+    background-color: hsl(var(--background));
+    border-bottom: 2px solid hsl(var(--border));
+    font-weight: 600;
+    color: hsl(var(--text-primary));
+    padding: 1rem 0.75rem;
+}
+
+.table td {
+    padding: 0.75rem;
+    vertical-align: middle;
+    border-bottom: 1px solid hsl(var(--border));
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) > td {
+    background-color: hsl(var(--background) / 0.5);
+}
+
+/* Status Indicators */
+.status-good {
+    color: hsl(var(--success-color));
+    font-weight: 600;
+}
+
+.status-warning {
+    color: hsl(var(--warning-color));
+    font-weight: 600;
+}
+
+.status-bad {
+    color: hsl(0 84% 60%);
+    font-weight: 600;
+}
+
+/* Form Check Styles */
+.form-check-input:checked {
+    background-color: hsl(var(--primary-color));
+    border-color: hsl(var(--primary-color));
+}
+
+.form-check-label {
+    font-weight: 500;
+    color: hsl(var(--text-primary));
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .dashboard-header .col-md-4 {
+        margin-top: 1rem;
+        text-align: left !important;
+    }
+    
+    .dashboard-tabs .nav-link {
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+    }
+    
+    .metric-card {
+        margin-bottom: 1rem;
+    }
+    
+    .chart-card {
+        min-height: 400px;
+    }
+    
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+}
+
+/* Chart Container - only apply to metric charts, not main chart */
+.metric-chart canvas {
+    max-height: 400px;
+}
+
+/* Small chart containers - reduce bottom margin and whitespace */
+.metric-chart {
+    padding-bottom: 0 !important;
+}
+
+.metric-chart canvas {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+    display: block !important;
+    height: 100% !important;
+}
+
+.metric-chart .card-body {
+    padding-bottom: 0.25rem !important;
+    height: calc(100% - 60px); /* Account for header */
+    overflow: hidden;
+}
+
+/* Remove extra spacing from chart containers */
+.chart-container {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+/* Loading and Empty States */
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid hsl(var(--border));
+    border-radius: 50%;
+    border-top-color: hsl(var(--primary-color));
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Alert Styles */
+.alert {
+    border-radius: 0.5rem;
+    border: none;
+    padding: 1rem 1.5rem;
+}
+
+.alert-success {
+    background-color: hsl(var(--success-color) / 0.1);
+    color: hsl(var(--success-color));
+    border-left: 4px solid hsl(var(--success-color));
+}
+
+.alert-warning {
+    background-color: hsl(var(--warning-color) / 0.1);
+    color: hsl(var(--warning-color));
+    border-left: 4px solid hsl(var(--warning-color));
+}
+
+.alert-danger {
+    background-color: hsl(0 84% 60% / 0.1);
+    color: hsl(0 84% 60%);
+    border-left: 4px solid hsl(0 84% 60%);
+}
+
+/* Utilities */
+.text-primary {
+    color: hsl(var(--primary-color)) !important;
+}
+
+.text-success {
+    color: hsl(var(--success-color)) !important;
+}
+
+.text-warning {
+    color: hsl(var(--warning-color)) !important;
+}
+
+.text-info {
+    color: hsl(var(--info-color)) !important;
+}
+
+.text-purple {
+    color: rgb(168, 85, 247) !important;
+}
+
+.bg-light {
+    background-color: hsl(var(--background)) !important;
+}
+
+/* Formula Reference Styles */
+.formula-group {
+    background-color: hsl(var(--background) / 0.5);
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    border: 1px solid hsl(var(--border));
+}
+
+.formula-item {
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    background-color: hsl(var(--surface));
+    border: 1px solid hsl(var(--border) / 0.5);
+    transition: all 0.2s ease;
+}
+
+.formula-item:hover {
+    background-color: hsl(var(--background));
+    border-color: hsl(var(--primary-color) / 0.3);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+}
+
+.formula-item strong {
+    color: hsl(var(--text-primary));
+    font-weight: 600;
+    display: block;
+    margin-bottom: 0.15rem;
+    font-size: 0.95rem;
+}
+
+.formula-item code {
+    background-color: hsl(var(--primary-color) / 0.1);
+    color: hsl(var(--primary-color));
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.2rem;
+    font-family: 'Courier New', monospace;
+    font-size: 0.8rem;
+    font-weight: 500;
+    display: block;
+    margin: 0.15rem 0;
+    border: 1px solid hsl(var(--primary-color) / 0.2);
+}
+
+.formula-item small {
+    color: hsl(var(--text-secondary));
+    font-style: italic;
+    line-height: 1.3;
+    font-size: 0.8rem;
+}
+
+/* Formula section headers */
+.formula-group h6 {
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.3rem;
+    border-bottom: 2px solid hsl(var(--border));
+    font-size: 1rem;
+}
+
+/* Special styling for the warning alert */
+.alert-info .formula-item {
+    background-color: transparent;
+    border: none;
+    padding: 0.25rem 0;
+}
+
+.alert-info .formula-item:hover {
+    background-color: transparent;
+    transform: none;
+    box-shadow: none;
+}
+
+.alert-info code {
+    background-color: hsl(var(--info-color) / 0.1);
+    color: hsl(var(--info-color));
+    border-color: hsl(var(--info-color) / 0.2);
+}
+
+/* Enhanced formula explanations */
+.formula-item strong {
+    font-size: 1rem;
+    color: hsl(var(--primary-color));
+}
+
+.formula-item small strong {
+    color: hsl(var(--text-primary));
+    font-weight: 600;
+}
+
+/* Action guide styling */
+.formula-item small {
+    line-height: 1.5;
+}
+
+.formula-item ul {
+    margin: 0.5rem 0;
+    padding-left: 1rem;
+}
+
+.formula-item li {
+    margin-bottom: 0.25rem;
+}
+
+/* Pro tips section */
+.alert-info .row .col-md-4 {
+    margin-bottom: 1rem;
+}
+
+.alert-info .row .col-md-4 strong {
+    color: hsl(var(--info-color));
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+/* Color coding for different metric types */
+.text-success .formula-group {
+    border-left: 4px solid hsl(var(--success-color));
+}
+
+.text-warning .formula-group {
+    border-left: 4px solid hsl(var(--warning-color));
+}
+
+.text-danger .formula-group {
+    border-left: 4px solid hsl(0 84% 60%);
+}
+
+.text-info .formula-group {
+    border-left: 4px solid hsl(var(--info-color));
+}
+
+.text-primary .formula-group {
+    border-left: 4px solid hsl(var(--primary-color));
+}
+
+/* Compact formulas tab styling */
+#formulas .card-body {
+    padding: 0.5rem;
+}
+
+#formulas .card-header {
+    padding: 0.5rem 1rem;
+}
+
+#formulas .formula-group {
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+#formulas .formula-item {
+    padding: 0.3rem 0.5rem;
+    margin-bottom: 0.25rem;
+}
+
+#formulas .formula-item strong {
+    font-size: 0.9rem;
+    margin-bottom: 0.1rem;
+}
+
+#formulas .formula-item code {
+    font-size: 0.75rem;
+    padding: 0.15rem 0.3rem;
+    margin: 0.1rem 0;
+}
+
+#formulas .formula-item small {
+    font-size: 0.75rem;
+    line-height: 1.2;
+}
+
+#formulas h6 {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.2rem;
+}
