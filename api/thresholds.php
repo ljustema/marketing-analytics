@@ -1,5 +1,6 @@
 <?php
-require_once 'auth.php';
+session_start();
+require_once __DIR__ . '/../includes/Auth.php';
 header('Content-Type: application/json');
 
 // Require authentication
@@ -7,7 +8,7 @@ Auth::requireLogin();
 $user = Auth::getCurrentUser();
 
 // User-specific thresholds file
-$userDir = 'users/' . $user['id'];
+$userDir = __DIR__ . '/../users/' . $user['id'];
 if (!file_exists($userDir)) {
     mkdir($userDir, 0755, true);
 }
@@ -24,6 +25,9 @@ $defaultThresholds = [
     'grossprofit' => ['low' => 25000, 'high' => 50000],
     'marketingSpend' => ['low' => 10000, 'high' => 25000],
     'nettovinst' => ['low' => 15000, 'high' => 30000],
+    'lostMargin' => ['low' => 70, 'high' => 80],
+    'marketingShareOfGrossprofit' => ['low' => 30, 'high' => 50],
+    'netProfitPerAdCrown' => ['low' => 0.5, 'high' => 1.0],
     'poasRoasRatio' => ['low' => 0.8, 'high' => 1.2]
 ];
 

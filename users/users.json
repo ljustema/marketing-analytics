@@ -1,9 +1,16 @@
 [
     {
-        "id": "6853df093139a",
+        "id": "68543b7a650b8",
+        "username": "Rasmus",
+        "password": "$2y$10$mccfUVX8tmA8uxINC\/P8Qu7psXWb4QIZYZfMb\/rC32szQgMQx4zW.",
+        "email": "rasmus@lejonfelt.se",
+        "created": "2025-06-19 16:31:54"
+    },
+    {
+        "id": "6854406cc81d4",
         "username": "Ljustema",
-        "password": "$2y$10$OGYyZ\/BtfboEvN0tNx3XfuE3T3NBG4fjyBeO9.gGmiwPFkDlDkeXW",
+        "password": "$2y$10$V1ZBVpe\/HrAQOxAcNJyEkOlmlr1wtr2JSVCeSJKO6bx9ViKW4gH72",
         "email": "info@ljustema.se",
-        "created": "2025-06-19 09:57:29"
+        "created": "2025-06-19 16:53:00"
     }
 ]

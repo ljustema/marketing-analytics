@@ -77,20 +77,77 @@ Once deployed, Railway will provide a URL like:
 
 ```
 marketing-analytics/
-├── auth.php              # Authentication system
-├── data.php              # User data API
-├── thresholds.php         # User thresholds API
-├── login.html             # Login/register page
-├── index.html             # Main application
-├── script.js              # Main JavaScript (with auth)
-├── styles.css             # Styling
+├── index.php              # Main entry point with routing
+├── templates/             # HTML templates
+│   ├── index.html         # Main application interface
+│   └── login.html         # Authentication page
+├── src/                   # Source assets
+│   ├── script.js          # Main application logic
+│   └── styles.css         # Application styling
+├── api/                   # Backend API endpoints
+│   ├── auth.php           # Authentication API
+│   ├── data.php           # User data API (with CSV header support)
+│   └── thresholds.php     # User thresholds API (complete defaults)
 ├── analytics/             # POAS analytics system
-├── data/                  # Sample data
-├── users/                 # User data storage
+│   ├── poas-analytics.js  # Main analytics engine
+│   ├── poas-predictor.js  # ML prediction algorithms
+│   ├── poas-charts.js     # Specialized charts
+│   ├── poas-analytics.css # Analytics styling
+│   ├── poas-interface.js  # Analytics UI
+│   └── poas-utils.js      # Utility functions
+├── data/                  # Sample data (cleaned field names)
+│   ├── sample_data.csv    # Sample marketing data
+│   └── sample_thresholds.json # Sample thresholds
+├── users/                 # User data storage (auto-created)
+│   ├── {user_id}/         # Individual user directories
+│   │   ├── data.csv       # User's marketing data
+│   │   └── thresholds.json # User's threshold settings
+│   └── users.json         # User accounts
+├── docs/                  # Documentation
+├── public/                # Static assets (future use)
 ├── railway.json           # Railway configuration
-├── nixpacks.toml          # Build configuration
-└── README.md              # Documentation
+├── nixpacks.toml          # Build configuration (with permissions)
+└── README.md              # Updated documentation
 ```
+
+**Recent Cleanup Changes:**
+- ✅ Fixed CSV field naming consistency (`marketingSpend` vs `marknadsföring`)
+- ✅ Added automatic CSV header creation for new users
+- ✅ Updated default thresholds to include all required fields
+- ✅ Reorganized file structure with proper directories
+- ✅ Created clean separation: templates/, src/, api/, public/
+- ✅ Added main index.php with routing for clean URLs
+- ✅ Updated all file references to work with new structure
+- ✅ Cleaned up empty user directories
+- ✅ Enhanced data persistence and error handling
+- ✅ Updated documentation and deployment guides
+
+## Pre-Deployment Checklist
+
+Before deploying to Railway, ensure:
+
+- [ ] All user data directories are properly isolated
+- [ ] CSV files use consistent field names (`marketingSpend` not `marknadsföring`)
+- [ ] Default thresholds include all required fields
+- [ ] Authentication system is working correctly
+- [ ] File permissions are set correctly (755 for directories)
+- [ ] .gitignore excludes sensitive files and user data
+- [ ] No unused files remain in the repository
+
+## Deployment Steps
+
+1. **Push to GitHub**: Ensure all changes are committed and pushed
+2. **Connect to Railway**: Link your GitHub repository to Railway
+3. **Environment Setup**: Railway will automatically detect PHP and use nixpacks.toml
+4. **Verify Deployment**: Test authentication and data persistence after deployment
+
+## Post-Deployment Verification
+
+1. **Test User Registration**: Create a new account
+2. **Test Data Entry**: Add marketing data for a month
+3. **Test Threshold Settings**: Modify and save threshold values
+4. **Test Analytics**: Verify all charts and analytics work correctly
+5. **Test Data Persistence**: Logout and login to verify data is saved
 
 ## Security Features
 

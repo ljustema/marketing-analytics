@@ -2,7 +2,7 @@
 nixPkgs = ["php82", "php82Extensions.mbstring", "php82Extensions.curl"]
 
 [phases.build]
-cmds = ["mkdir -p data users"]
+cmds = ["mkdir -p data users src templates api analytics includes", "chmod 755 data users src templates api analytics includes"]
 
 [start]
 cmd = "php -S 0.0.0.0:$PORT"

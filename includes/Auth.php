@@ -1,43 +1,54 @@
 <?php
-session_start();
-
 // Simple user authentication system
+// Note: session_start() should be called before including this file
+
 class Auth {
-    private static $usersFile = 'users/users.json';
-    
+    private static $usersFile;
+
     public static function init() {
+        // Initialize paths
+        if (!self::$usersFile) {
+            self::$usersFile = __DIR__ . '/../users/users.json';
+        }
+
         // Create users directory and file if they don't exist
-        if (!file_exists('users')) {
-            mkdir('users', 0755, true);
+        $usersDir = __DIR__ . '/../users';
+        if (!file_exists($usersDir)) {
+            mkdir($usersDir, 0755, true);
         }
         if (!file_exists(self::$usersFile)) {
             file_put_contents(self::$usersFile, json_encode([]));
         }
     }
     
-    public static function register($username, $password, $email = '') {
+    public static function register($email, $password, $username = '') {
         self::init();
-        
+
         // Validate input
-        if (empty($username) || empty($password)) {
-            return ['success' => false, 'message' => 'Användarnamn och lösenord krävs'];
+        if (empty($email) || empty($password)) {
+            return ['success' => false, 'message' => 'E-post och lösenord krävs'];
         }
-        
-        if (strlen($username) < 3) {
-            return ['success' => false, 'message' => 'Användarnamnet måste vara minst 3 tecken'];
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return ['success' => false, 'message' => 'Ogiltig e-postadress'];
         }
-        
+
         if (strlen($password) < 6) {
             return ['success' => false, 'message' => 'Lösenordet måste vara minst 6 tecken'];
         }
-        
+
+        // Generate username if not provided
+        if (empty($username)) {
+            $username = explode('@', $email)[0]; // Use part before @ as username
+        }
+
         // Load existing users
         $users = json_decode(file_get_contents(self::$usersFile), true) ?: [];
-        
-        // Check if user already exists
+
+        // Check if email already exists
         foreach ($users as $user) {
-            if ($user['username'] === $username) {
-                return ['success' => false, 'message' => 'Användarnamnet är redan taget'];
+            if ($user['email'] === $email) {
+                return ['success' => false, 'message' => 'E-postadressen är redan registrerad'];
             }
         }
         
@@ -55,40 +66,44 @@ class Auth {
         // Save users
         if (file_put_contents(self::$usersFile, json_encode($users, JSON_PRETTY_PRINT))) {
             // Create user data directory
-            $userDir = 'users/' . $newUser['id'];
+            $userDir = __DIR__ . '/../users/' . $newUser['id'];
             if (!file_exists($userDir)) {
                 mkdir($userDir, 0755, true);
             }
-            
+
+            // Copy sample data to new user directory
+            self::initializeUserData($userDir);
+
             return ['success' => true, 'message' => 'Konto skapat framgångsrikt'];
         } else {
             return ['success' => false, 'message' => 'Kunde inte skapa konto'];
         }
     }
     
-    public static function login($username, $password) {
+    public static function login($email, $password) {
         self::init();
-        
+
         // Load users
         $users = json_decode(file_get_contents(self::$usersFile), true) ?: [];
-        
-        // Find user
+
+        // Find user by email
         foreach ($users as $user) {
-            if ($user['username'] === $username) {
+            if ($user['email'] === $email) {
                 if (password_verify($password, $user['password'])) {
                     // Set session
                     $_SESSION['user_id'] = $user['id'];
                     $_SESSION['username'] = $user['username'];
+                    $_SESSION['email'] = $user['email'];
                     $_SESSION['logged_in'] = true;
-                    
+
                     return ['success' => true, 'message' => 'Inloggning lyckades'];
                 } else {
                     return ['success' => false, 'message' => 'Felaktigt lösenord'];
                 }
             }
         }
-        
-        return ['success' => false, 'message' => 'Användaren hittades inte'];
+
+        return ['success' => false, 'message' => 'E-postadressen hittades inte'];
     }
     
     public static function logout() {
@@ -104,7 +119,8 @@ class Auth {
         if (self::isLoggedIn()) {
             return [
                 'id' => $_SESSION['user_id'],
-                'username' => $_SESSION['username']
+                'username' => $_SESSION['username'] ?? 'User',
+                'email' => $_SESSION['email'] ?? ''
             ];
         }
         return null;
@@ -117,49 +133,19 @@ class Auth {
             exit;
         }
     }
-}
 
-// Handle API requests
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $input = json_decode(file_get_contents('php://input'), true);
-    $action = $input['action'] ?? '';
-    
-    switch ($action) {
-        case 'register':
-            $result = Auth::register($input['username'], $input['password'], $input['email'] ?? '');
-            echo json_encode($result);
-            break;
-            
-        case 'login':
-            $result = Auth::login($input['username'], $input['password']);
-            echo json_encode($result);
-            break;
-            
-        case 'logout':
-            $result = Auth::logout();
-            echo json_encode($result);
-            break;
-            
-        case 'check':
-            echo json_encode([
-                'logged_in' => Auth::isLoggedIn(),
-                'user' => Auth::getCurrentUser()
-            ]);
-            break;
-            
-        default:
-            http_response_code(400);
-            echo json_encode(['error' => 'Okänd åtgärd']);
+    private static function initializeUserData($userDir) {
+        // Copy sample data to user directory if it exists
+        $sampleDataFile = __DIR__ . '/../data/sample_data.csv';
+        $sampleThresholdsFile = __DIR__ . '/../data/sample_thresholds.json';
+
+        if (file_exists($sampleDataFile)) {
+            copy($sampleDataFile, $userDir . '/data.csv');
+        }
+
+        if (file_exists($sampleThresholdsFile)) {
+            copy($sampleThresholdsFile, $userDir . '/thresholds.json');
+        }
     }
-    exit;
-}
-
-// For GET requests, return current auth status
-if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    echo json_encode([
-        'logged_in' => Auth::isLoggedIn(),
-        'user' => Auth::getCurrentUser()
-    ]);
-    exit;
 }
 ?>

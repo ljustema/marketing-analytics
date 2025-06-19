@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Logga in - Marketing Analytics</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.ico">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="styles.css" rel="stylesheet">
+    <link href="src/styles.css" rel="stylesheet">
     <style>
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -71,19 +72,19 @@
                             <i class="fas fa-chart-line me-2"></i>
                             Marketing Analytics
                         </h2>
-                        <p class="mb-0 mt-2 opacity-75">Logga in på ditt konto</p>
+                        <p class="mb-0 mt-2 opacity-75">Använd din e-postadress för att logga in</p>
                     </div>
                     <div class="auth-body">
                         <!-- Login Form -->
                         <div id="loginForm">
                             <form id="loginFormElement">
                                 <div class="mb-3">
-                                    <label for="loginUsername" class="form-label">Användarnamn</label>
+                                    <label for="loginEmail" class="form-label">E-post</label>
                                     <div class="input-group">
                                         <span class="input-group-text">
-                                            <i class="fas fa-user"></i>
+                                            <i class="fas fa-envelope"></i>
                                         </span>
-                                        <input type="text" class="form-control" id="loginUsername" required>
+                                        <input type="email" class="form-control" id="loginEmail" name="username" autocomplete="email username" required>
                                     </div>
                                 </div>
                                 <div class="mb-3">
@@ -92,7 +93,7 @@
                                         <span class="input-group-text">
                                             <i class="fas fa-lock"></i>
                                         </span>
-                                        <input type="password" class="form-control" id="loginPassword" required>
+                                        <input type="password" class="form-control" id="loginPassword" name="password" autocomplete="current-password" required>
                                     </div>
                                 </div>
                                 <button type="submit" class="btn btn-primary w-100 mb-3">
@@ -111,23 +112,14 @@
                         <div id="registerForm" style="display: none;">
                             <form id="registerFormElement">
                                 <div class="mb-3">
-                                    <label for="registerUsername" class="form-label">Användarnamn</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text">
-                                            <i class="fas fa-user"></i>
-                                        </span>
-                                        <input type="text" class="form-control" id="registerUsername" required>
-                                    </div>
-                                    <div class="form-text">Minst 3 tecken</div>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="registerEmail" class="form-label">E-post (valfritt)</label>
+                                    <label for="registerEmail" class="form-label">E-post</label>
                                     <div class="input-group">
                                         <span class="input-group-text">
                                             <i class="fas fa-envelope"></i>
                                         </span>
-                                        <input type="email" class="form-control" id="registerEmail">
+                                        <input type="email" class="form-control" id="registerEmail" name="email" autocomplete="email username" required>
                                     </div>
+                                    <div class="form-text">Används för inloggning</div>
                                 </div>
                                 <div class="mb-3">
                                     <label for="registerPassword" class="form-label">Lösenord</label>
@@ -135,9 +127,19 @@
                                         <span class="input-group-text">
                                             <i class="fas fa-lock"></i>
                                         </span>
-                                        <input type="password" class="form-control" id="registerPassword" required>
+                                        <input type="password" class="form-control" id="registerPassword" name="new-password" autocomplete="new-password" required>
                                     </div>
                                     <div class="form-text">Minst 6 tecken</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="registerUsername" class="form-label">Visningsnamn (valfritt)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-user"></i>
+                                        </span>
+                                        <input type="text" class="form-control" id="registerUsername" name="fullname" autocomplete="off" placeholder="Lämna tomt för att använda e-post">
+                                    </div>
+                                    <div class="form-text">Endast för visning, inte för inloggning</div>
                                 </div>
                                 <button type="submit" class="btn btn-primary w-100 mb-3">
                                     <i class="fas fa-user-plus me-2"></i>Skapa konto
@@ -189,19 +191,19 @@
         // Login form handler
         document.getElementById('loginFormElement').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
-            const username = document.getElementById('loginUsername').value;
+
+            const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
-            
+
             try {
-                const response = await fetch('auth.php', {
+                const response = await fetch('api/auth.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
                         action: 'login',
-                        username: username,
+                        email: email,
                         password: password
                     })
                 });
@@ -211,7 +213,7 @@
                 if (result.success) {
                     showAlert(result.message, 'success');
                     setTimeout(() => {
-                        window.location.href = 'index.html';
+                        window.location.href = '/app';
                     }, 1000);
                 } else {
                     showAlert(result.message, 'danger');
@@ -224,21 +226,21 @@
         // Register form handler
         document.getElementById('registerFormElement').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
-            const username = document.getElementById('registerUsername').value;
+
             const email = document.getElementById('registerEmail').value;
+            const username = document.getElementById('registerUsername').value;
             const password = document.getElementById('registerPassword').value;
-            
+
             try {
-                const response = await fetch('auth.php', {
+                const response = await fetch('api/auth.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
                         action: 'register',
-                        username: username,
                         email: email,
+                        username: username,
                         password: password
                     })
                 });
@@ -261,11 +263,11 @@
         // Check if already logged in
         window.addEventListener('load', async function() {
             try {
-                const response = await fetch('auth.php');
+                const response = await fetch('api/auth.php');
                 const result = await response.json();
                 
                 if (result.logged_in) {
-                    window.location.href = 'index.html';
+                    window.location.href = '/app';
                 }
             } catch (error) {
                 console.log('Auth check failed');

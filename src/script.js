@@ -32,11 +32,11 @@ let thresholds = {
 // Authentication functions
 async function checkAuth() {
     try {
-        const response = await fetch('auth.php');
+        const response = await fetch('api/auth.php');
         const result = await response.json();
 
         if (!result.logged_in) {
-            window.location.href = 'login.html';
+            window.location.href = '/login';
             return false;
         }
 
@@ -47,14 +47,14 @@ async function checkAuth() {
         return true;
     } catch (error) {
         console.error('Auth check failed:', error);
-        window.location.href = 'login.html';
+        window.location.href = '/login';
         return false;
     }
 }
 
 async function logout() {
     try {
-        const response = await fetch('auth.php', {
+        const response = await fetch('api/auth.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -63,11 +63,11 @@ async function logout() {
         });
 
         if (response.ok) {
-            window.location.href = 'login.html';
+            window.location.href = '/login';
         }
     } catch (error) {
         console.error('Logout failed:', error);
-        window.location.href = 'login.html';
+        window.location.href = '/login';
     }
 }
 
@@ -153,7 +153,7 @@ async function initializePOASAnalytics() {
 // Load data from CSV via API
 async function loadData() {
     try {
-        const response = await fetch('data.php');
+        const response = await fetch('api/data.php');
         if (response.ok) {
             monthlyData = await response.json();
             if (Array.isArray(monthlyData)) {
@@ -186,10 +186,16 @@ async function loadData() {
                         poasRoasRatio: poasRoasRatio
                     };
                 });
+            } else {
+                monthlyData = [];
             }
+        } else {
+            console.error('Failed to load data:', response.status);
+            monthlyData = [];
         }
     } catch (error) {
         console.error('Error loading data:', error);
+        monthlyData = [];
     }
     updateDataTable();
     updateAnalytics();
@@ -200,7 +206,7 @@ async function loadData() {
 // Load thresholds from JSON file via API
 async function loadThresholds() {
     try {
-        const response = await fetch('thresholds.php');
+        const response = await fetch('api/thresholds.php');
         if (response.ok) {
             const savedThresholds = await response.json();
             // Merge saved thresholds with defaults to ensure all properties exist
@@ -254,7 +260,7 @@ async function loadThresholds() {
 // Save data to CSV via PHP API
 async function saveData(newData) {
     try {
-        const response = await fetch('data.php', {
+        const response = await fetch('api/data.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -274,7 +280,7 @@ async function saveData(newData) {
 // Save thresholds to JSON file via API
 async function saveThresholds() {
     try {
-        const response = await fetch('thresholds.php', {
+        const response = await fetch('api/thresholds.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -291,13 +297,159 @@ async function saveThresholds() {
     }
 }
 
+// CSV Download/Upload Functions
+function downloadCSVTemplate() {
+    // Create CSV content with sample data
+    const csvContent = `month,revenue,grossprofit,marketingSpend
+2024-01,100000,40000,15000
+2024-02,120000,48000,18000
+2024-03,110000,44000,16000`;
+
+    // Create and download file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'marketing_data_template.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    showAlert('CSV-mall har laddats ner. Redigera filen och ladda upp den igen.', 'success');
+}
+
+async function handleCSVUpload() {
+    const fileInput = document.getElementById('csvFileInput');
+    const file = fileInput.files[0];
+    if (!file) {
+        showAlert('Välj en CSV-fil först.', 'warning');
+        return;
+    }
+
+    let statusDiv = document.getElementById('csvUploadStatus');
+    if (!statusDiv) {
+        console.error('csvUploadStatus element not found, creating one');
+        // Create the status div if it doesn't exist
+        statusDiv = document.createElement('div');
+        statusDiv.id = 'csvUploadStatus';
+        statusDiv.className = 'alert';
+        statusDiv.style.display = 'none';
+
+        // Try to insert it after the CSV upload button
+        const uploadButton = document.getElementById('csvUploadButton');
+        if (uploadButton && uploadButton.parentNode) {
+            uploadButton.parentNode.insertBefore(statusDiv, uploadButton.nextSibling);
+        } else {
+            // Fallback: just show an alert
+            showAlert('CSV upload status element not found. Please refresh the page.', 'warning');
+            return;
+        }
+    }
+    statusDiv.style.display = 'block';
+    statusDiv.className = 'alert alert-info';
+    statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Laddar upp CSV-fil...';
+
+    try {
+        const text = await file.text();
+        const lines = text.trim().split('\n');
+
+        if (lines.length < 2) {
+            throw new Error('CSV-filen måste innehålla minst en rubrikrad och en datarad');
+        }
+
+        // Parse header
+        const header = lines[0].split(',').map(col => col.trim());
+        const expectedColumns = ['month', 'revenue', 'grossprofit', 'marketingSpend'];
+
+        // Validate header
+        for (const col of expectedColumns) {
+            if (!header.includes(col)) {
+                throw new Error(`Saknad kolumn: ${col}. Förväntade kolumner: ${expectedColumns.join(', ')}`);
+            }
+        }
+
+        // Parse data for bulk upload
+        const bulkData = [];
+
+        for (let i = 1; i < lines.length; i++) {
+            const values = lines[i].split(',').map(val => val.trim());
+            if (values.length !== header.length) continue;
+
+            const rowData = {};
+            header.forEach((col, index) => {
+                rowData[col] = values[index];
+            });
+
+            // Validate and convert data
+            const monthData = {
+                month: rowData.month,
+                revenue: parseFloat(rowData.revenue) || 0,
+                grossprofit: parseFloat(rowData.grossprofit) || 0,
+                marketingSpend: parseFloat(rowData.marketingSpend) || 0
+            };
+
+            bulkData.push(monthData);
+        }
+
+        // Upload all data in one request
+        const response = await fetch('api/data.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                action: 'bulk_upload',
+                data: bulkData
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to upload CSV data');
+        }
+
+        const result = await response.json();
+        const successCount = result.successCount || 0;
+        const errorCount = result.errorCount || 0;
+
+        // Update UI
+        await loadData();
+        updateDataTable();
+        updateAnalytics();
+
+        // Show results
+        if (errorCount === 0) {
+            statusDiv.className = 'alert alert-success';
+            statusDiv.innerHTML = `<i class="fas fa-check me-2"></i>Framgångsrikt! ${successCount} rader importerade.`;
+        } else {
+            statusDiv.className = 'alert alert-warning';
+            statusDiv.innerHTML = `<i class="fas fa-exclamation-triangle me-2"></i>Delvis framgång: ${successCount} rader importerade, ${errorCount} fel.`;
+        }
+
+        // Clear file input and disable button
+        fileInput.value = '';
+        document.getElementById('csvUploadButton').disabled = true;
+
+    } catch (error) {
+        console.error('CSV upload error:', error);
+        statusDiv.className = 'alert alert-danger';
+        statusDiv.innerHTML = `<i class="fas fa-times me-2"></i>Fel: ${error.message}`;
+    }
+}
+
 // Initialize event listeners
 function initializeEventListeners() {
     // Data form submission
     document.getElementById('dataForm').addEventListener('submit', handleDataSubmission);
-    
+
     // Threshold form submission
     document.getElementById('thresholdForm').addEventListener('submit', handleThresholdUpdate);
+
+    // CSV file input change
+    document.getElementById('csvFileInput').addEventListener('change', function(event) {
+        const uploadButton = document.getElementById('csvUploadButton');
+        uploadButton.disabled = !event.target.files[0];
+    });
     
     // Chart control checkboxes
     document.getElementById('showROAS').addEventListener('change', updateTrendsChart);
@@ -472,7 +624,7 @@ async function deleteData(index) {
     if (confirm('Är du säker på att du vill ta bort denna post?')) {
         const month = monthlyData[index].month;
         try {
-            const response = await fetch(`/api/data/${month}`, {
+            const response = await fetch(`api/data.php?month=${month}`, {
                 method: 'DELETE'
             });
             if (response.ok) {
@@ -2278,7 +2430,7 @@ async function clearAllData() {
         try {
             // Delete all entries one by one
             for (const data of monthlyData) {
-                await fetch(`/api/data/${data.month}`, {
+                await fetch(`api/data.php?month=${data.month}`, {
                     method: 'DELETE'
                 });
             }
@@ -2314,24 +2466,39 @@ function getStatusClass(value, thresholdObj) {
 
 function showAlert(message, type) {
     // Remove existing alerts
-    const existingAlerts = document.querySelectorAll('.alert');
+    const existingAlerts = document.querySelectorAll('.custom-alert');
     existingAlerts.forEach(alert => alert.remove());
-    
+
     const alertDiv = document.createElement('div');
-    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show custom-alert`;
     alertDiv.style.position = 'fixed';
     alertDiv.style.top = '20px';
     alertDiv.style.right = '20px';
-    alertDiv.style.zIndex = '9999';
-    alertDiv.style.minWidth = '300px';
-    
+    alertDiv.style.zIndex = '99999';
+    alertDiv.style.minWidth = '350px';
+    alertDiv.style.maxWidth = '500px';
+    alertDiv.style.backgroundColor = type === 'success' ? '#d4edda' : type === 'danger' ? '#f8d7da' : type === 'warning' ? '#fff3cd' : '#d1ecf1';
+    alertDiv.style.border = type === 'success' ? '1px solid #c3e6cb' : type === 'danger' ? '1px solid #f5c6cb' : type === 'warning' ? '1px solid #ffeaa7' : '1px solid #bee5eb';
+    alertDiv.style.color = type === 'success' ? '#155724' : type === 'danger' ? '#721c24' : type === 'warning' ? '#856404' : '#0c5460';
+    alertDiv.style.fontWeight = '500';
+    alertDiv.style.fontSize = '14px';
+    alertDiv.style.padding = '12px 16px';
+    alertDiv.style.borderRadius = '8px';
+    alertDiv.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+    alertDiv.style.backdropFilter = 'blur(10px)';
+
     alertDiv.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center;">
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'danger' ? 'fa-exclamation-triangle' : type === 'warning' ? 'fa-exclamation-circle' : 'fa-info-circle'}" style="margin-right: 8px; font-size: 16px;"></i>
+                <span>${message}</span>
+            </div>
+            <button type="button" class="btn-close" onclick="this.parentElement.parentElement.remove()" style="margin-left: 12px; background: none; border: none; font-size: 18px; cursor: pointer; opacity: 0.7;" aria-label="Close">&times;</button>
+        </div>
     `;
-    
+
     document.body.appendChild(alertDiv);
-    
+
     // Auto-remove after 5 seconds
     setTimeout(() => {
         if (alertDiv.parentNode) {
