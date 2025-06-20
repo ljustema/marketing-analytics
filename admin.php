@@ -216,7 +216,18 @@ function formatBytes($size, $precision = 2) {
                                         <td><code><?= htmlspecialchars(substr($user['id'], 0, 8)) ?>...</code></td>
                                         <td><?= htmlspecialchars($user['email']) ?></td>
                                         <td><?= htmlspecialchars($user['username'] ?? 'N/A') ?></td>
-                                        <td><?= date('Y-m-d H:i', $user['created']) ?></td>
+                                        <td>
+                                            <?php
+                                            $created = $user['created'];
+                                            if (is_string($created)) {
+                                                // If it's already a formatted string, just display it
+                                                echo htmlspecialchars($created);
+                                            } else {
+                                                // If it's a timestamp, format it
+                                                echo date('Y-m-d H:i', $created);
+                                            }
+                                            ?>
+                                        </td>
                                         <td>
                                             <?php if ($dataRows > 0): ?>
                                                 <span class="badge bg-success"><?= $dataRows ?> rows</span>
