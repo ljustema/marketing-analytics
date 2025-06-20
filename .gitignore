@@ -1,6 +1,8 @@
-# User data files
+# User data files (but keep sample files)
 data/*.csv
 data/*.json
+!data/sample_data.csv
+!data/sample_thresholds.json
 users/*/
 
 # Temporary files

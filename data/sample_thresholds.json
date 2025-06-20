@@ -1,0 +1,54 @@
+{
+    "roas": {
+        "low": 7,
+        "high": 9
+    },
+    "poas": {
+        "low": 2,
+        "high": 3
+    },
+    "grossMarginPercent": {
+        "low": 30,
+        "high": 35
+    },
+    "netProfitPercent": {
+        "low": 20,
+        "high": 25
+    },
+    "marketingPercent": {
+        "low": 9,
+        "high": 12
+    },
+    "revenue": {
+        "low": 1500000,
+        "high": 3000000
+    },
+    "grossprofit": {
+        "low": 400000,
+        "high": 1000000
+    },
+    "marketingSpend": {
+        "low": 100000,
+        "high": 300000
+    },
+    "nettovinst": {
+        "low": 300000,
+        "high": 500000
+    },
+    "lostMargin": {
+        "low": 65,
+        "high": 70
+    },
+    "marketingShareOfGrossprofit": {
+        "low": 30,
+        "high": 50
+    },
+    "netProfitPerAdCrown": {
+        "low": 1.5,
+        "high": 3
+    },
+    "poasRoasRatio": {
+        "low": 0.3,
+        "high": 0.4
+    }
+}
