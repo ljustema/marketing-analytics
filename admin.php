@@ -2,7 +2,7 @@
 session_start();
 
 // Simple admin authentication (change this password!)
-$adminPassword = 'admin123'; // TODO: Change this to a secure password
+$adminPassword = 'sfdg098745jhjfg!'; // TODO: Change this to a secure password
 
 // Handle logout
 if (isset($_GET['logout'])) {
@@ -13,43 +13,52 @@ if (isset($_GET['logout'])) {
 
 // Handle login
 if (!isset($_SESSION['admin_logged_in'])) {
-    if ($_POST['admin_password'] ?? '' === $adminPassword) {
-        $_SESSION['admin_logged_in'] = true;
-    } else {
-        ?>
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Admin Login</title>
-            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-        </head>
-        <body class="bg-light">
-            <div class="container mt-5">
-                <div class="row justify-content-center">
-                    <div class="col-md-4">
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title text-center">🔐 Admin Login</h5>
-                                <?php if ($_POST): ?>
-                                    <div class="alert alert-danger">Invalid password</div>
-                                <?php endif; ?>
-                                <form method="POST">
-                                    <div class="mb-3">
-                                        <label for="admin_password" class="form-label">Password</label>
-                                        <input type="password" class="form-control" id="admin_password" name="admin_password" required>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary w-100">Login</button>
-                                </form>
-                            </div>
+    // Check if login form was submitted
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_password'])) {
+        if ($_POST['admin_password'] === $adminPassword) {
+            $_SESSION['admin_logged_in'] = true;
+            // Redirect to prevent form resubmission
+            header('Location: admin.php');
+            exit;
+        } else {
+            $loginError = true;
+        }
+    }
+
+    // Show login form (either first visit or wrong password)
+    ?>
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Admin Login</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    </head>
+    <body class="bg-light">
+        <div class="container mt-5">
+            <div class="row justify-content-center">
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title text-center">🔐 Admin Login</h5>
+                            <?php if (isset($loginError)): ?>
+                                <div class="alert alert-danger">Invalid password</div>
+                            <?php endif; ?>
+                            <form method="POST">
+                                <div class="mb-3">
+                                    <label for="admin_password" class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="admin_password" name="admin_password" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">Login</button>
+                            </form>
                         </div>
                     </div>
                 </div>
             </div>
-        </body>
-        </html>
-        <?php
-        exit;
-    }
+        </div>
+    </body>
+    </html>
+    <?php
+    exit;
 }
 
 // Handle user deletion
