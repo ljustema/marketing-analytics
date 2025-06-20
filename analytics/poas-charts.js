@@ -17,6 +17,20 @@ class POASCharts {
     }
 
     /**
+     * Get chart colors based on current theme
+     */
+    getChartColors() {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+        return {
+            background: isDark ? '#1e293b' : '#f8fafc',
+            gridColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+            textColor: isDark ? '#e2e8f0' : '#0f172a',
+            mutedTextColor: isDark ? '#a1a9b8' : '#64748b'
+        };
+    }
+
+    /**
      * Create POAS Optimization Chart
      * Shows net profit prediction across different POAS values
      */
@@ -187,6 +201,8 @@ class POASCharts {
             predictions['4.0']?.prediction.marketingSpend || 0
         ];
 
+        const chartColors = this.getChartColors();
+
         this.charts[containerId] = new Chart(ctx, {
             type: 'bar',
             data: {
@@ -214,13 +230,22 @@ class POASCharts {
                     title: {
                         display: true,
                         text: 'Scenariojämförelse - Olika POAS Mål',
-                        font: { size: 16, weight: 'bold' }
+                        font: { size: 16, weight: 'bold' },
+                        color: chartColors.textColor
                     },
                     legend: {
                         display: true,
-                        position: 'top'
+                        position: 'top',
+                        labels: {
+                            color: chartColors.textColor
+                        }
                     },
                     tooltip: {
+                        backgroundColor: chartColors.background,
+                        titleColor: chartColors.textColor,
+                        bodyColor: chartColors.textColor,
+                        borderColor: chartColors.gridColor,
+                        borderWidth: 1,
                         callbacks: {
                             label: function(context) {
                                 return `${context.dataset.label}: ${POASUtils.formatCurrency(context.parsed.y)}`;
@@ -232,7 +257,14 @@ class POASCharts {
                     x: {
                         title: {
                             display: true,
-                            text: 'Scenario'
+                            text: 'Scenario',
+                            color: chartColors.textColor
+                        },
+                        ticks: {
+                            color: chartColors.mutedTextColor
+                        },
+                        grid: {
+                            color: chartColors.gridColor
                         }
                     },
                     y: {
@@ -241,12 +273,17 @@ class POASCharts {
                         position: 'left',
                         title: {
                             display: true,
-                            text: 'Nettovinst (SEK)'
+                            text: 'Nettovinst (SEK)',
+                            color: chartColors.textColor
                         },
                         ticks: {
+                            color: chartColors.mutedTextColor,
                             callback: function(value) {
                                 return POASUtils.formatNumber(value, 0);
                             }
+                        },
+                        grid: {
+                            color: chartColors.gridColor
                         }
                     },
                     y1: {
@@ -255,9 +292,11 @@ class POASCharts {
                         position: 'right',
                         title: {
                             display: true,
-                            text: 'Marknadsföring (SEK)'
+                            text: 'Marknadsföring (SEK)',
+                            color: chartColors.textColor
                         },
                         ticks: {
+                            color: chartColors.mutedTextColor,
                             callback: function(value) {
                                 return POASUtils.formatNumber(value, 0);
                             }

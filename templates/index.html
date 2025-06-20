@@ -47,7 +47,7 @@
                     <button class="btn btn-outline-light me-2" onclick="toggleDarkMode()" id="themeToggle">
                         <i class="fas fa-moon me-2"></i>Mörkt Läge
                     </button>
-                    <button class="btn btn-outline-primary me-2" onclick="exportData()">
+                    <button class="btn btn-outline-light me-2" onclick="exportData()">
                         <i class="fas fa-download me-2"></i>Exportera Data
                     </button>
                 </div>
@@ -67,18 +67,18 @@
                 </button>
             </li>
             <li class="nav-item" role="presentation">
+                <button class="nav-link" id="formulas-tab" data-bs-toggle="tab" data-bs-target="#formulas" type="button" role="tab">
+                    <i class="fas fa-calculator me-2"></i>Formler
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
                 <button class="nav-link" id="simulator-tab" data-bs-toggle="tab" data-bs-target="#simulator" type="button" role="tab">
-                    <i class="fas fa-calculator me-2"></i>POAS Simulator
+                    <i class="fas fa-calculator me-2"></i>POAS Simulator <span class="badge bg-warning text-dark ms-1">BETA</span>
                 </button>
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="predictive-analytics-tab" data-bs-toggle="tab" data-bs-target="#predictive-analytics" type="button" role="tab">
-                    <i class="fas fa-brain me-2"></i>Prediktiv Analys
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="formulas-tab" data-bs-toggle="tab" data-bs-target="#formulas" type="button" role="tab">
-                    <i class="fas fa-calculator me-2"></i>Formler
+                    <i class="fas fa-brain me-2"></i>Prediktiv Analys <span class="badge bg-warning text-dark ms-1">BETA</span>
                 </button>
             </li>
         </ul>
@@ -187,7 +187,7 @@
                 </div>
 
                 <!-- Metric Cards - Horizontal Layout -->
-                <div class="row mb-4">
+                <div class="row mb-2">
                     <div class="col-md-2">
                         <div class="card metric-card h-100">
                             <div class="card-body text-center py-3">
@@ -450,7 +450,7 @@
                         <div class="card chart-card metric-chart">
                             <div class="card-header pb-2">
                                 <h5 class="card-title mb-0">
-                                    <i class="fas fa-chart-line-down me-2"></i>Förlorad marginal (ROAS – POAS %)
+                                    <i class="fas fa-arrow-trend-down me-2"></i>Förlorad marginal (ROAS – POAS %)
                                 </h5>
                                 <small class="text-muted">((ROAS – POAS) ÷ ROAS) × 100<br>Visar hur stor andel av intäkterna som försvinner i varukostnad, frakt, packning och andra direkta kostnader – alltså skillnaden mellan omsättningen och den verkliga bruttovinsten per annonskrona. Lägre värde är bättre.</small>
                             </div>

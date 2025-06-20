@@ -9,6 +9,7 @@
     --border: 214 13% 91%; /* #e2e8f0 */
     --text-primary: 222 84% 5%; /* #0f172a */
     --text-secondary: 215 16% 47%; /* #64748b */
+    --text-muted: 215 16% 47%; /* #64748b - same as secondary in light mode */
     --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
@@ -22,8 +23,9 @@
     --background: 222 84% 5%; /* #0f172a */
     --surface: 215 28% 17%; /* #1e293b */
     --border: 215 14% 34%; /* #475569 */
-    --text-primary: 210 40% 98%; /* #f8fafc */
-    --text-secondary: 215 20% 65%; /* #94a3b8 */
+    --text-primary: 210 40% 95%; /* #e2e8f0 - slightly less bright than pure white */
+    --text-secondary: 215 20% 70%; /* #a1a9b8 - lighter for better visibility */
+    --text-muted: 215 20% 75%; /* #a8b3c7 - lighter for better visibility */
     --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
 }
@@ -143,6 +145,7 @@ body {
     background: linear-gradient(135deg, hsl(var(--surface)) 0%, hsl(var(--background)) 100%);
     border: 1px solid hsl(var(--border));
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    margin-bottom: 0rem; /* Reduced bottom margin */
 }
 
 .metric-card:hover {
@@ -242,7 +245,7 @@ body {
     border-bottom: 1px solid hsl(var(--border));
 }
 
-.table-striped > tbody > tr:nth-of-type(odd) > td {
+.table-striped > tbody > tr:nth-of-type(even) > td {
     background-color: hsl(var(--background) / 0.5);
 }
 
@@ -286,7 +289,7 @@ body {
     }
     
     .metric-card {
-        margin-bottom: 1rem;
+        margin-bottom: 0.5rem;
     }
     
     .chart-card {
@@ -386,6 +389,132 @@ body {
 
 .text-purple {
     color: rgb(168, 85, 247) !important;
+}
+
+.text-muted {
+    color: hsl(var(--text-muted)) !important;
+}
+
+/* Chart styling for dark mode */
+[data-theme="dark"] .card {
+    background-color: hsl(var(--surface));
+}
+
+[data-theme="dark"] canvas {
+    background-color: hsl(var(--surface)) !important;
+}
+
+/* Ensure chart containers have proper background */
+[data-theme="dark"] .chart-card {
+    background-color: hsl(var(--surface));
+}
+
+[data-theme="dark"] .chart-card .card-body {
+    background-color: hsl(var(--surface));
+}
+
+/* Fix headers in dark mode */
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4,
+[data-theme="dark"] h5,
+[data-theme="dark"] h6,
+[data-theme="dark"] .card-title {
+    color: hsl(var(--text-primary)) !important;
+}
+
+/* Data Manager dark mode fixes */
+[data-theme="dark"] .table {
+    color: hsl(var(--text-primary));
+    background-color: hsl(var(--surface));
+}
+
+[data-theme="dark"] .table th {
+    color: hsl(var(--text-primary));
+    background-color: hsl(var(--background));
+    border-color: hsl(var(--border));
+}
+
+[data-theme="dark"] .table td {
+    color: hsl(var(--text-primary));
+    border-color: hsl(var(--border));
+}
+
+[data-theme="dark"] .table-striped > tbody > tr:nth-of-type(even) > td {
+    background-color: hsl(var(--background));
+}
+
+[data-theme="dark"] .table-striped > tbody > tr:nth-of-type(odd) > td {
+    background-color: hsl(var(--surface));
+}
+
+[data-theme="dark"] .form-control {
+    background-color: hsl(var(--surface));
+    border-color: hsl(var(--border));
+    color: hsl(var(--text-primary));
+}
+
+[data-theme="dark"] .form-control:focus {
+    background-color: hsl(var(--surface));
+    border-color: hsl(var(--primary-color));
+    color: hsl(var(--text-primary));
+    box-shadow: 0 0 0 0.2rem hsla(var(--primary-color) / 0.25);
+}
+
+[data-theme="dark"] .form-control::placeholder {
+    color: hsl(var(--text-secondary));
+}
+
+[data-theme="dark"] .form-select {
+    background-color: hsl(var(--surface));
+    border-color: hsl(var(--border));
+    color: hsl(var(--text-primary));
+}
+
+[data-theme="dark"] .form-label {
+    color: hsl(var(--text-primary));
+}
+
+/* Additional dark mode improvements */
+[data-theme="dark"] .btn-outline-primary {
+    color: hsl(var(--primary-color));
+    border-color: hsl(var(--primary-color));
+}
+
+[data-theme="dark"] .btn-outline-primary:hover {
+    background-color: hsl(var(--primary-color));
+    color: hsl(var(--background));
+}
+
+[data-theme="dark"] .btn-outline-secondary {
+    color: hsl(var(--text-secondary));
+    border-color: hsl(var(--border));
+}
+
+[data-theme="dark"] .btn-outline-danger {
+    color: hsl(0 84% 60%);
+    border-color: hsl(0 84% 60%);
+}
+
+[data-theme="dark"] .alert {
+    background-color: hsl(var(--surface));
+    border-color: hsl(var(--border));
+    color: hsl(var(--text-primary));
+}
+
+[data-theme="dark"] .bg-light {
+    background-color: hsl(var(--surface)) !important;
+    color: hsl(var(--text-primary)) !important;
+}
+
+/* Fix any remaining dark text issues */
+[data-theme="dark"] .text-dark {
+    color: hsl(var(--text-primary)) !important;
+}
+
+[data-theme="dark"] small {
+    color: hsl(var(--text-muted)) !important;
 }
 
 .bg-light {

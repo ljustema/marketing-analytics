@@ -73,6 +73,9 @@ async function logout() {
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', async function() {
+    // Initialize dark mode first
+    initializeDarkMode();
+
     // Check authentication first
     const isAuthenticated = await checkAuth();
     if (!isAuthenticated) {
@@ -84,7 +87,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     initializeEventListeners();
     updateAnalytics();
     setDefaultSimulatorValues();
-    initializeDarkMode();
     updateFormulaThresholds(); // Initialize formula thresholds
 });
 
@@ -816,37 +818,49 @@ function updateAnalytics() {
             return sum + (netProfit / data.marketingSpend);
         }, 0) / comparisonData.length;
 
-        // Update comparison displays - first row
+        // Show and update comparison displays - first row
+        document.getElementById('roasComparison').style.display = 'block';
         document.getElementById('roasComparison').innerHTML = getComparisonText(avgROAS, compAvgROAS, ' %-enheter');
+        document.getElementById('poasComparison').style.display = 'block';
         document.getElementById('poasComparison').innerHTML = getComparisonText(avgPOAS, compAvgPOAS, ' %-enheter');
+        document.getElementById('grossMarginPercentComparison').style.display = 'block';
         document.getElementById('grossMarginPercentComparison').innerHTML = getComparisonText(avggrossMarginPercent, compAvggrossMarginPercent, ' %-enheter');
+        document.getElementById('netProfitPercentComparison').style.display = 'block';
         document.getElementById('netProfitPercentComparison').innerHTML = getComparisonText(avgNetProfitPercent, compAvgNetProfitPercent, ' %-enheter');
+        document.getElementById('marketingPercentComparison').style.display = 'block';
         document.getElementById('marketingPercentComparison').innerHTML = getComparisonText(avgMarketingPercent, compAvgMarketingPercent, ' %-enheter', true);
+        document.getElementById('netProfitComparison').style.display = 'block';
         document.getElementById('netProfitComparison').innerHTML = getComparisonText(avgNetProfit, compAvgNetProfit, ' kr');
 
-        // Update comparison displays - second row
+        // Show and update comparison displays - second row
+        document.getElementById('revenueComparison').style.display = 'block';
         document.getElementById('revenueComparison').innerHTML = getComparisonText(avgRevenue, compAvgRevenue, ' kr');
+        document.getElementById('grossprofitComparison').style.display = 'block';
         document.getElementById('grossprofitComparison').innerHTML = getComparisonText(avgGrossprofit, compAvgGrossprofit, ' kr');
+        document.getElementById('marketingSpendComparison').style.display = 'block';
         document.getElementById('marketingSpendComparison').innerHTML = getComparisonText(avgMarketingSpend, compAvgMarketingSpend, ' kr', true);
+        document.getElementById('lostMarginComparison').style.display = 'block';
         document.getElementById('lostMarginComparison').innerHTML = getComparisonText(avgLostMargin, compAvgLostMargin, ' %-enheter', true);
+        document.getElementById('marketingShareOfGrossprofitComparison').style.display = 'block';
         document.getElementById('marketingShareOfGrossprofitComparison').innerHTML = getComparisonText(avgMarketingShareOfGrossprofit, compAvgMarketingShareOfGrossprofit, ' %-enheter', true);
+        document.getElementById('netProfitPerAdCrownComparison').style.display = 'block';
         document.getElementById('netProfitPerAdCrownComparison').innerHTML = getComparisonText(avgNetProfitPerAdCrown, compAvgNetProfitPerAdCrown, ' %-enheter');
     } else {
-        // Clear comparison displays - first row
-        document.getElementById('roasComparison').textContent = '-';
-        document.getElementById('poasComparison').textContent = '-';
-        document.getElementById('grossMarginPercentComparison').textContent = '-';
-        document.getElementById('netProfitPercentComparison').textContent = '-';
-        document.getElementById('marketingPercentComparison').textContent = '-';
-        document.getElementById('netProfitComparison').textContent = '-';
+        // Hide comparison displays - first row
+        document.getElementById('roasComparison').style.display = 'none';
+        document.getElementById('poasComparison').style.display = 'none';
+        document.getElementById('grossMarginPercentComparison').style.display = 'none';
+        document.getElementById('netProfitPercentComparison').style.display = 'none';
+        document.getElementById('marketingPercentComparison').style.display = 'none';
+        document.getElementById('netProfitComparison').style.display = 'none';
 
-        // Clear comparison displays - second row
-        document.getElementById('revenueComparison').textContent = '-';
-        document.getElementById('grossprofitComparison').textContent = '-';
-        document.getElementById('marketingSpendComparison').textContent = '-';
-        document.getElementById('lostMarginComparison').textContent = '-';
-        document.getElementById('marketingShareOfGrossprofitComparison').textContent = '-';
-        document.getElementById('netProfitPerAdCrownComparison').textContent = '-';
+        // Hide comparison displays - second row
+        document.getElementById('revenueComparison').style.display = 'none';
+        document.getElementById('grossprofitComparison').style.display = 'none';
+        document.getElementById('marketingSpendComparison').style.display = 'none';
+        document.getElementById('lostMarginComparison').style.display = 'none';
+        document.getElementById('marketingShareOfGrossprofitComparison').style.display = 'none';
+        document.getElementById('netProfitPerAdCrownComparison').style.display = 'none';
     }
 
     updateTrendsChart();
@@ -907,13 +921,14 @@ function updateTrendsChart() {
     
     const labels = filteredData.map(data => formatMonth(data.month));
     const datasets = [];
+    const dataColors = getDataColors();
 
     if (showROAS) {
         datasets.push({
             label: 'ROAS',
             data: filteredData.map(data => data.roas),
-            borderColor: 'rgb(37, 99, 235)',
-            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+            borderColor: dataColors.roas.border,
+            backgroundColor: dataColors.roas.background,
             borderWidth: 3,
             fill: true,
             tension: 0.4,
@@ -925,8 +940,8 @@ function updateTrendsChart() {
         datasets.push({
             label: 'POAS',
             data: filteredData.map(data => data.poas),
-            borderColor: 'rgb(22, 163, 74)',
-            backgroundColor: 'rgba(22, 163, 74, 0.1)',
+            borderColor: dataColors.poas.border,
+            backgroundColor: dataColors.poas.background,
             borderWidth: 3,
             fill: true,
             tension: 0.4,
@@ -942,8 +957,8 @@ function updateTrendsChart() {
                 if (data.roas === 0) return 0;
                 return ((data.roas - data.poas) / data.roas) * 100;
             }),
-            borderColor: 'rgb(239, 68, 68)',
-            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+            borderColor: dataColors.lostMargin.border,
+            backgroundColor: dataColors.lostMargin.background,
             borderWidth: 3,
             fill: true,
             tension: 0.4,
@@ -959,8 +974,8 @@ function updateTrendsChart() {
                 if (data.grossprofit === 0) return 0;
                 return (data.marketingSpend / data.grossprofit) * 100;
             }),
-            borderColor: 'rgb(168, 85, 247)',
-            backgroundColor: 'rgba(168, 85, 247, 0.1)',
+            borderColor: dataColors.marketingShareOfGrossprofit.border,
+            backgroundColor: dataColors.marketingShareOfGrossprofit.background,
             borderWidth: 3,
             fill: true,
             tension: 0.4,
@@ -977,8 +992,8 @@ function updateTrendsChart() {
                 const netProfit = data.grossprofit - data.marketingSpend;
                 return netProfit / data.marketingSpend;
             }),
-            borderColor: 'rgb(14, 165, 233)',
-            backgroundColor: 'rgba(14, 165, 233, 0.1)',
+            borderColor: dataColors.netProfitPerAdCrown.border,
+            backgroundColor: dataColors.netProfitPerAdCrown.background,
             borderWidth: 3,
             fill: true,
             tension: 0.4,
@@ -990,8 +1005,8 @@ function updateTrendsChart() {
         datasets.push({
             label: 'Bruttovinst (%)',
             data: filteredData.map(data => data.grossMarginPercent),
-            borderColor: 'rgb(234, 179, 8)',
-            backgroundColor: 'rgba(234, 179, 8, 0.1)',
+            borderColor: dataColors.grossMarginPercent.border,
+            backgroundColor: dataColors.grossMarginPercent.background,
             borderWidth: 3,
             fill: true,
             tension: 0.4,
@@ -1003,8 +1018,8 @@ function updateTrendsChart() {
         datasets.push({
             label: 'Nettovinst (%)',
             data: filteredData.map(data => data.netProfitPercent),
-            borderColor: 'rgb(220, 38, 127)',
-            backgroundColor: 'rgba(220, 38, 127, 0.1)',
+            borderColor: dataColors.netProfitPercent.border,
+            backgroundColor: dataColors.netProfitPercent.background,
             borderWidth: 3,
             fill: true,
             tension: 0.4,
@@ -1016,8 +1031,8 @@ function updateTrendsChart() {
         datasets.push({
             label: 'Marknadsföring (%)',
             data: filteredData.map(data => data.marketingPercent),
-            borderColor: 'rgb(14, 165, 233)',
-            backgroundColor: 'rgba(14, 165, 233, 0.1)',
+            borderColor: dataColors.marketingPercent.border,
+            backgroundColor: dataColors.marketingPercent.background,
             borderWidth: 3,
             fill: true,
             tension: 0.4,
@@ -1029,8 +1044,8 @@ function updateTrendsChart() {
         datasets.push({
             label: 'Omsättning (SEK)',
             data: filteredData.map(data => data.revenue),
-            borderColor: 'rgb(168, 85, 247)',
-            backgroundColor: 'rgba(168, 85, 247, 0.1)',
+            borderColor: dataColors.revenue.border,
+            backgroundColor: dataColors.revenue.background,
             borderWidth: 3,
             fill: true,
             tension: 0.4,
@@ -1042,8 +1057,8 @@ function updateTrendsChart() {
         datasets.push({
             label: 'Bruttovinst (SEK)',
             data: filteredData.map(data => data.grossprofit),
-            borderColor: 'rgb(34, 197, 94)',
-            backgroundColor: 'rgba(34, 197, 94, 0.1)',
+            borderColor: dataColors.grossprofit.border,
+            backgroundColor: dataColors.grossprofit.background,
             borderWidth: 3,
             fill: true,
             tension: 0.4,
@@ -1055,8 +1070,8 @@ function updateTrendsChart() {
         datasets.push({
             label: 'Marknadsföring (SEK)',
             data: filteredData.map(data => data.marketingSpend),
-            borderColor: 'rgb(239, 68, 68)',
-            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+            borderColor: dataColors.marketingSpend.border,
+            backgroundColor: dataColors.marketingSpend.background,
             borderWidth: 3,
             fill: true,
             tension: 0.4,
@@ -1068,8 +1083,8 @@ function updateTrendsChart() {
         datasets.push({
             label: 'Nettovinst (SEK)',
             data: filteredData.map(data => data.grossprofit - data.marketingSpend),
-            borderColor: 'rgb(217, 119, 6)',
-            backgroundColor: 'rgba(217, 119, 6, 0.1)',
+            borderColor: dataColors.nettovinst.border,
+            backgroundColor: dataColors.nettovinst.background,
             borderWidth: 3,
             fill: true,
             tension: 0.4,
@@ -1077,6 +1092,8 @@ function updateTrendsChart() {
         });
     }
     
+    const chartColors = getChartColors();
+
     trendsChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -1090,54 +1107,20 @@ function updateTrendsChart() {
                 mode: 'index',
                 intersect: false,
             },
-            scales: {
-                x: {
-                    display: true,
-                    title: {
-                        display: true,
-                        text: 'Månad'
-                    }
-                },
-                y: {
-                    type: 'linear',
-                    display: true,
-                    position: 'left',
-                    title: {
-                        display: true,
-                        text: 'ROAS / POAS'
-                    }
-                },
-                y1: {
-                    type: 'linear',
-                    display: true,
-                    position: 'right',
-                    title: {
-                        display: true,
-                        text: 'Procent (%)'
-                    },
-                    grid: {
-                        drawOnChartArea: false,
-                    },
-                },
-                y2: {
-                    type: 'linear',
-                    display: false,
-                    position: 'right',
-                    title: {
-                        display: true,
-                        text: 'SEK'
-                    },
-                    grid: {
-                        drawOnChartArea: false,
-                    },
-                }
-            },
             plugins: {
                 legend: {
                     display: true,
-                    position: 'top'
+                    position: 'top',
+                    labels: {
+                        color: chartColors.textColor
+                    }
                 },
                 tooltip: {
+                    backgroundColor: chartColors.background,
+                    titleColor: chartColors.textColor,
+                    bodyColor: chartColors.textColor,
+                    borderColor: chartColors.gridColor,
+                    borderWidth: 1,
                     callbacks: {
                         afterLabel: function(context) {
                             const dataIndex = context.dataIndex;
@@ -1149,6 +1132,70 @@ function updateTrendsChart() {
                             ];
                         }
                     }
+                }
+            },
+            scales: {
+                x: {
+                    display: true,
+                    title: {
+                        display: true,
+                        text: 'Månad',
+                        color: chartColors.textColor
+                    },
+                    ticks: {
+                        color: chartColors.mutedTextColor
+                    },
+                    grid: {
+                        color: chartColors.gridColor
+                    }
+                },
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'ROAS / POAS',
+                        color: chartColors.textColor
+                    },
+                    ticks: {
+                        color: chartColors.mutedTextColor
+                    },
+                    grid: {
+                        color: chartColors.gridColor
+                    }
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: 'Procent (%)',
+                        color: chartColors.textColor
+                    },
+                    ticks: {
+                        color: chartColors.mutedTextColor
+                    },
+                    grid: {
+                        drawOnChartArea: false,
+                    },
+                },
+                y2: {
+                    type: 'linear',
+                    display: false,
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: 'SEK',
+                        color: chartColors.textColor
+                    },
+                    ticks: {
+                        color: chartColors.mutedTextColor
+                    },
+                    grid: {
+                        drawOnChartArea: false,
+                    },
                 }
             }
         }
@@ -1198,6 +1245,9 @@ function updateROASChart(labels) {
     const filteredData = getFilteredData();
     const data = filteredData.map(data => data.roas);
     
+    const chartColors = getChartColors();
+    const dataColors = getDataColors();
+
     roasChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -1205,16 +1255,16 @@ function updateROASChart(labels) {
             datasets: [{
                 label: 'ROAS',
                 data: data,
-                borderColor: 'rgb(37, 99, 235)',
-                backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                borderColor: dataColors.roas.border,
+                backgroundColor: dataColors.roas.background,
                 borderWidth: 3,
                 fill: true,
                 tension: 0.4
             }, {
                 label: 'Hög Tröskel',
                 data: new Array(data.length).fill(thresholds.roas.high),
-                borderColor: 'rgba(34, 197, 94, 0.8)',
-                backgroundColor: 'transparent',
+                borderColor: dataColors.thresholdHigh.border,
+                backgroundColor: dataColors.thresholdHigh.background,
                 borderWidth: 2,
                 borderDash: [5, 5],
                 pointRadius: 0,
@@ -1222,8 +1272,8 @@ function updateROASChart(labels) {
             }, {
                 label: 'Låg Tröskel',
                 data: new Array(data.length).fill(thresholds.roas.low),
-                borderColor: 'rgba(239, 68, 68, 0.8)',
-                backgroundColor: 'transparent',
+                borderColor: dataColors.thresholdLow.border,
+                backgroundColor: dataColors.thresholdLow.background,
                 borderWidth: 2,
                 borderDash: [10, 5],
                 pointRadius: 0,
@@ -1233,18 +1283,38 @@ function updateROASChart(labels) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        color: chartColors.textColor
+                    }
+                }
+            },
             scales: {
                 x: {
                     ticks: {
                         maxRotation: 45,
-                        minRotation: 45
+                        minRotation: 45,
+                        color: chartColors.mutedTextColor
+                    },
+                    grid: {
+                        color: chartColors.gridColor
                     }
                 },
                 y: {
                     beginAtZero: false,
                     title: {
                         display: true,
-                        text: 'ROAS'
+                        text: 'ROAS',
+                        color: chartColors.textColor
+                    },
+                    ticks: {
+                        color: chartColors.mutedTextColor
+                    },
+                    grid: {
+                        color: chartColors.gridColor
                     },
                     min: function(context) {
                         const data = context.chart.data.datasets[0].data;
@@ -1253,12 +1323,6 @@ function updateROASChart(labels) {
                         // Start axis at 0.2 below the lower of: minimum data value or low threshold
                         return Math.max(0, Math.min(minValue, thresholdLow) - 0.2);
                     }
-                }
-            },
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'top'
                 }
             }
         }
@@ -1275,7 +1339,9 @@ function updatePOASChart(labels) {
 
     const filteredData = getFilteredData();
     const data = filteredData.map(data => data.poas);
-    
+    const chartColors = getChartColors();
+    const dataColors = getDataColors();
+
     poasChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -1283,8 +1349,8 @@ function updatePOASChart(labels) {
             datasets: [{
                 label: 'POAS',
                 data: data,
-                borderColor: 'rgb(22, 163, 74)',
-                backgroundColor: 'rgba(22, 163, 74, 0.1)',
+                borderColor: dataColors.poas.border,
+                backgroundColor: dataColors.poas.background,
                 borderWidth: 3,
                 fill: true,
                 tension: 0.4
@@ -1319,14 +1385,27 @@ function updatePOASChart(labels) {
             scales: {
                 x: {
                     ticks: {
-                        padding: 0
+                        padding: 0,
+                        maxRotation: 45,
+                        minRotation: 45,
+                        color: chartColors.mutedTextColor
+                    },
+                    grid: {
+                        color: chartColors.gridColor
                     }
                 },
                 y: {
                     beginAtZero: false,
                     title: {
                         display: true,
-                        text: 'POAS'
+                        text: 'POAS',
+                        color: chartColors.textColor
+                    },
+                    ticks: {
+                        color: chartColors.mutedTextColor
+                    },
+                    grid: {
+                        color: chartColors.gridColor
                     },
                     min: function(context) {
                         const data = context.chart.data.datasets[0].data;
@@ -1340,7 +1419,10 @@ function updatePOASChart(labels) {
             plugins: {
                 legend: {
                     display: true,
-                    position: 'top'
+                    position: 'top',
+                    labels: {
+                        color: chartColors.textColor
+                    }
                 }
             }
         }
@@ -1357,7 +1439,9 @@ function updategrossMarginPercentChart(labels) {
 
     const filteredData = getFilteredData();
     const data = filteredData.map(data => data.grossMarginPercent);
-    
+    const chartColors = getChartColors();
+    const dataColors = getDataColors();
+
     grossMarginPercentChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -1365,8 +1449,8 @@ function updategrossMarginPercentChart(labels) {
             datasets: [{
                 label: 'Bruttovinst (%)',
                 data: data,
-                borderColor: 'rgb(234, 179, 8)',
-                backgroundColor: 'rgba(234, 179, 8, 0.1)',
+                borderColor: dataColors.grossMarginPercent.border,
+                backgroundColor: dataColors.grossMarginPercent.background,
                 borderWidth: 3,
                 fill: true,
                 tension: 0.4
@@ -1401,14 +1485,27 @@ function updategrossMarginPercentChart(labels) {
             scales: {
                 x: {
                     ticks: {
-                        padding: 0
+                        padding: 0,
+                        maxRotation: 45,
+                        minRotation: 45,
+                        color: chartColors.mutedTextColor
+                    },
+                    grid: {
+                        color: chartColors.gridColor
                     }
                 },
                 y: {
                     beginAtZero: false,
                     title: {
                         display: true,
-                        text: 'Bruttovinst (%)'
+                        text: 'Bruttovinst (%)',
+                        color: chartColors.textColor
+                    },
+                    ticks: {
+                        color: chartColors.mutedTextColor
+                    },
+                    grid: {
+                        color: chartColors.gridColor
                     },
                     min: function(context) {
                         const data = context.chart.data.datasets[0].data;
@@ -1422,7 +1519,10 @@ function updategrossMarginPercentChart(labels) {
             plugins: {
                 legend: {
                     display: true,
-                    position: 'top'
+                    position: 'top',
+                    labels: {
+                        color: chartColors.textColor
+                    }
                 }
             }
         }
@@ -1439,6 +1539,8 @@ function updateNetProfitPercentChart(labels) {
 
     const filteredData = getFilteredData();
     const data = filteredData.map(data => data.netProfitPercent);
+    const chartColors = getChartColors();
+    const dataColors = getDataColors();
 
     netProfitPercentChart = new Chart(ctx, {
         type: 'line',
@@ -1447,8 +1549,8 @@ function updateNetProfitPercentChart(labels) {
             datasets: [{
                 label: 'Nettovinst (%)',
                 data: data,
-                borderColor: 'rgb(220, 38, 127)',
-                backgroundColor: 'rgba(220, 38, 127, 0.1)',
+                borderColor: dataColors.netProfitPercent.border,
+                backgroundColor: dataColors.netProfitPercent.background,
                 borderWidth: 3,
                 fill: true,
                 tension: 0.4
@@ -1483,14 +1585,27 @@ function updateNetProfitPercentChart(labels) {
             scales: {
                 x: {
                     ticks: {
-                        padding: 0
+                        padding: 0,
+                        maxRotation: 45,
+                        minRotation: 45,
+                        color: chartColors.mutedTextColor
+                    },
+                    grid: {
+                        color: chartColors.gridColor
                     }
                 },
                 y: {
                     beginAtZero: false,
                     title: {
                         display: true,
-                        text: 'Nettovinst (%)'
+                        text: 'Nettovinst (%)',
+                        color: chartColors.textColor
+                    },
+                    ticks: {
+                        color: chartColors.mutedTextColor
+                    },
+                    grid: {
+                        color: chartColors.gridColor
                     },
                     min: function(context) {
                         const data = context.chart.data.datasets[0].data;
@@ -1505,7 +1620,10 @@ function updateNetProfitPercentChart(labels) {
             plugins: {
                 legend: {
                     display: true,
-                    position: 'top'
+                    position: 'top',
+                    labels: {
+                        color: chartColors.textColor
+                    }
                 }
             }
         }
@@ -1522,7 +1640,9 @@ function updateMarketingPercentChart(labels) {
 
     const filteredData = getFilteredData();
     const data = filteredData.map(data => data.marketingPercent);
-    
+    const chartColors = getChartColors();
+    const dataColors = getDataColors();
+
     marketingPercentChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -1530,8 +1650,8 @@ function updateMarketingPercentChart(labels) {
             datasets: [{
                 label: 'Marknadsföring (%)',
                 data: data,
-                borderColor: 'rgb(14, 165, 233)',
-                backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                borderColor: dataColors.marketingPercent.border,
+                backgroundColor: dataColors.marketingPercent.background,
                 borderWidth: 3,
                 fill: true,
                 tension: 0.4
@@ -1566,14 +1686,27 @@ function updateMarketingPercentChart(labels) {
             scales: {
                 x: {
                     ticks: {
-                        padding: 0
+                        padding: 0,
+                        maxRotation: 45,
+                        minRotation: 45,
+                        color: chartColors.mutedTextColor
+                    },
+                    grid: {
+                        color: chartColors.gridColor
                     }
                 },
                 y: {
                     beginAtZero: false,
                     title: {
                         display: true,
-                        text: 'Marknadsföring (%)'
+                        text: 'Marknadsföring (%)',
+                        color: chartColors.textColor
+                    },
+                    ticks: {
+                        color: chartColors.mutedTextColor
+                    },
+                    grid: {
+                        color: chartColors.gridColor
                     },
                     min: function(context) {
                         const data = context.chart.data.datasets[0].data;
@@ -1587,7 +1720,10 @@ function updateMarketingPercentChart(labels) {
             plugins: {
                 legend: {
                     display: true,
-                    position: 'top'
+                    position: 'top',
+                    labels: {
+                        color: chartColors.textColor
+                    }
                 }
             }
         }
@@ -1604,6 +1740,8 @@ function updaterevenueChart(labels) {
 
     const filteredData = getFilteredData();
     const data = filteredData.map(data => data.revenue);
+    const chartColors = getChartColors();
+    const dataColors = getDataColors();
 
     revenueChart = new Chart(ctx, {
         type: 'line',
@@ -1612,8 +1750,8 @@ function updaterevenueChart(labels) {
             datasets: [{
                 label: 'Omsättning (SEK)',
                 data: data,
-                borderColor: 'rgb(168, 85, 247)',
-                backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                borderColor: dataColors.revenue.border,
+                backgroundColor: dataColors.revenue.background,
                 borderWidth: 3,
                 fill: true,
                 tension: 0.4
@@ -1648,25 +1786,39 @@ function updaterevenueChart(labels) {
             scales: {
                 x: {
                     ticks: {
-                        padding: 0
+                        padding: 0,
+                        maxRotation: 45,
+                        minRotation: 45,
+                        color: chartColors.mutedTextColor
+                    },
+                    grid: {
+                        color: chartColors.gridColor
                     }
                 },
                 y: {
                     title: {
                         display: true,
-                        text: 'Omsättning (SEK)'
+                        text: 'Omsättning (SEK)',
+                        color: chartColors.textColor
                     },
                     ticks: {
+                        color: chartColors.mutedTextColor,
                         callback: function(value) {
                             return formatCurrency(value);
                         }
+                    },
+                    grid: {
+                        color: chartColors.gridColor
                     }
                 }
             },
             plugins: {
                 legend: {
                     display: true,
-                    position: 'top'
+                    position: 'top',
+                    labels: {
+                        color: chartColors.textColor
+                    }
                 }
             }
         }
@@ -1683,6 +1835,8 @@ function updategrossprofitChart(labels) {
 
     const filteredData = getFilteredData();
     const data = filteredData.map(data => data.grossprofit);
+    const chartColors = getChartColors();
+    const dataColors = getDataColors();
 
     grossprofitChart = new Chart(ctx, {
         type: 'line',
@@ -1691,8 +1845,8 @@ function updategrossprofitChart(labels) {
             datasets: [{
                 label: 'Bruttovinst (SEK)',
                 data: data,
-                borderColor: 'rgb(34, 197, 94)',
-                backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                borderColor: dataColors.grossprofit.border,
+                backgroundColor: dataColors.grossprofit.background,
                 borderWidth: 3,
                 fill: true,
                 tension: 0.4
@@ -1727,25 +1881,39 @@ function updategrossprofitChart(labels) {
             scales: {
                 x: {
                     ticks: {
-                        padding: 0
+                        padding: 0,
+                        maxRotation: 45,
+                        minRotation: 45,
+                        color: chartColors.mutedTextColor
+                    },
+                    grid: {
+                        color: chartColors.gridColor
                     }
                 },
                 y: {
                     title: {
                         display: true,
-                        text: 'Intäkt (SEK)'
+                        text: 'Intäkt (SEK)',
+                        color: chartColors.textColor
                     },
                     ticks: {
+                        color: chartColors.mutedTextColor,
                         callback: function(value) {
                             return formatCurrency(value);
                         }
+                    },
+                    grid: {
+                        color: chartColors.gridColor
                     }
                 }
             },
             plugins: {
                 legend: {
                     display: true,
-                    position: 'top'
+                    position: 'top',
+                    labels: {
+                        color: chartColors.textColor
+                    }
                 }
             }
         }
@@ -1762,6 +1930,8 @@ function updatemarketingSpendChart(labels) {
 
     const filteredData = getFilteredData();
     const data = filteredData.map(data => data.marketingSpend);
+    const chartColors = getChartColors();
+    const dataColors = getDataColors();
 
     marketingSpendChart = new Chart(ctx, {
         type: 'line',
@@ -1770,8 +1940,8 @@ function updatemarketingSpendChart(labels) {
             datasets: [{
                 label: 'Marknadsföring (SEK)',
                 data: data,
-                borderColor: 'rgb(239, 68, 68)',
-                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                borderColor: dataColors.marketingSpend.border,
+                backgroundColor: dataColors.marketingSpend.background,
                 borderWidth: 3,
                 fill: true,
                 tension: 0.4
@@ -1806,25 +1976,39 @@ function updatemarketingSpendChart(labels) {
             scales: {
                 x: {
                     ticks: {
-                        padding: 0
+                        padding: 0,
+                        maxRotation: 45,
+                        minRotation: 45,
+                        color: chartColors.mutedTextColor
+                    },
+                    grid: {
+                        color: chartColors.gridColor
                     }
                 },
                 y: {
                     title: {
                         display: true,
-                        text: 'Marknadsföring (SEK)'
+                        text: 'Marknadsföring (SEK)',
+                        color: chartColors.textColor
                     },
                     ticks: {
+                        color: chartColors.mutedTextColor,
                         callback: function(value) {
                             return formatCurrency(value);
                         }
+                    },
+                    grid: {
+                        color: chartColors.gridColor
                     }
                 }
             },
             plugins: {
                 legend: {
                     display: true,
-                    position: 'top'
+                    position: 'top',
+                    labels: {
+                        color: chartColors.textColor
+                    }
                 }
             }
         }
@@ -1834,6 +2018,8 @@ function updatemarketingSpendChart(labels) {
 function updateNettovinstChart(labels) {
     const filteredData = getFilteredData();
     const data = filteredData.map(data => data.grossprofit - data.marketingSpend);
+    const chartColors = getChartColors();
+    const dataColors = getDataColors();
 
     const ctx = document.getElementById('nettovinstChart');
     if (!ctx) return;
@@ -1849,8 +2035,8 @@ function updateNettovinstChart(labels) {
             datasets: [{
                 label: 'Nettovinst (SEK)',
                 data: data,
-                borderColor: 'rgb(168, 85, 247)',
-                backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                borderColor: dataColors.nettovinst.border,
+                backgroundColor: dataColors.nettovinst.background,
                 borderWidth: 3,
                 fill: true,
                 tension: 0.4
@@ -1889,26 +2075,40 @@ function updateNettovinstChart(labels) {
             scales: {
                 x: {
                     ticks: {
-                        padding: 0
+                        padding: 0,
+                        maxRotation: 45,
+                        minRotation: 45,
+                        color: chartColors.mutedTextColor
+                    },
+                    grid: {
+                        color: chartColors.gridColor
                     }
                 },
                 y: {
                     beginAtZero: true,
                     title: {
                         display: true,
-                        text: 'Nettovinst (SEK)'
+                        text: 'Nettovinst (SEK)',
+                        color: chartColors.textColor
                     },
                     ticks: {
+                        color: chartColors.mutedTextColor,
                         callback: function(value) {
                             return formatCurrency(value);
                         }
+                    },
+                    grid: {
+                        color: chartColors.gridColor
                     }
                 }
             },
             plugins: {
                 legend: {
                     display: true,
-                    position: 'top'
+                    position: 'top',
+                    labels: {
+                        color: chartColors.textColor
+                    }
                 },
                 tooltip: {
                     callbacks: {
@@ -1929,6 +2129,8 @@ function updateLostMarginChart(labels) {
         if (data.roas === 0) return 0;
         return ((data.roas - data.poas) / data.roas) * 100;
     });
+    const chartColors = getChartColors();
+    const dataColors = getDataColors();
 
     const ctx = document.getElementById('lostMarginChart');
     if (!ctx) return;
@@ -1946,8 +2148,8 @@ function updateLostMarginChart(labels) {
             datasets: [{
                 label: 'Förlorad marginal',
                 data: data,
-                borderColor: 'rgb(239, 68, 68)',
-                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                borderColor: dataColors.lostMargin.border,
+                backgroundColor: dataColors.lostMargin.background,
                 borderWidth: 3,
                 fill: true,
                 tension: 0.4
@@ -1986,19 +2188,30 @@ function updateLostMarginChart(labels) {
             scales: {
                 x: {
                     ticks: {
-                        padding: 0
+                        padding: 0,
+                        maxRotation: 45,
+                        minRotation: 45,
+                        color: chartColors.mutedTextColor
+                    },
+                    grid: {
+                        color: chartColors.gridColor
                     }
                 },
                 y: {
                     beginAtZero: false,
                     title: {
                         display: true,
-                        text: 'Förlorad marginal (%)'
+                        text: 'Förlorad marginal (%)',
+                        color: chartColors.textColor
                     },
                     ticks: {
+                        color: chartColors.mutedTextColor,
                         callback: function(value) {
                             return value.toFixed(1) + '%';
                         }
+                    },
+                    grid: {
+                        color: chartColors.gridColor
                     },
                     min: function(context) {
                         const data = context.chart.data.datasets[0].data;
@@ -2012,7 +2225,10 @@ function updateLostMarginChart(labels) {
             plugins: {
                 legend: {
                     display: true,
-                    position: 'top'
+                    position: 'top',
+                    labels: {
+                        color: chartColors.textColor
+                    }
                 },
                 tooltip: {
                     callbacks: {
@@ -2048,6 +2264,7 @@ function updateMarketingShareOfGrossprofitChart(labels) {
         if (data.grossprofit === 0) return 0;
         return (data.marketingSpend / data.grossprofit) * 100;
     });
+    const chartColors = getChartColors();
 
     const ctx = document.getElementById('marketingShareOfGrossprofitChart');
     if (!ctx) return;
@@ -2057,6 +2274,7 @@ function updateMarketingShareOfGrossprofitChart(labels) {
     }
 
     const thresholdData = data.map(() => thresholds.marketingShareOfGrossprofit);
+    const dataColors = getDataColors();
 
     marketingShareOfGrossprofitChart = new Chart(ctx, {
         type: 'line',
@@ -2065,8 +2283,8 @@ function updateMarketingShareOfGrossprofitChart(labels) {
             datasets: [{
                 label: 'Marknadsföringens andel av bruttovinsten',
                 data: data,
-                borderColor: 'rgb(168, 85, 247)',
-                backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                borderColor: dataColors.marketingShareOfGrossprofit.border,
+                backgroundColor: dataColors.marketingShareOfGrossprofit.background,
                 borderWidth: 3,
                 fill: true,
                 tension: 0.4
@@ -2105,26 +2323,40 @@ function updateMarketingShareOfGrossprofitChart(labels) {
             scales: {
                 x: {
                     ticks: {
-                        padding: 0
+                        padding: 0,
+                        maxRotation: 45,
+                        minRotation: 45,
+                        color: chartColors.mutedTextColor
+                    },
+                    grid: {
+                        color: chartColors.gridColor
                     }
                 },
                 y: {
                     beginAtZero: true,
                     title: {
                         display: true,
-                        text: 'Marknadsföringens andel (%)'
+                        text: 'Marknadsföringens andel (%)',
+                        color: chartColors.textColor
                     },
                     ticks: {
+                        color: chartColors.mutedTextColor,
                         callback: function(value) {
                             return value.toFixed(1) + '%';
                         }
+                    },
+                    grid: {
+                        color: chartColors.gridColor
                     }
                 }
             },
             plugins: {
                 legend: {
                     display: true,
-                    position: 'top'
+                    position: 'top',
+                    labels: {
+                        color: chartColors.textColor
+                    }
                 },
                 tooltip: {
                     callbacks: {
@@ -2162,6 +2394,7 @@ function updateNetProfitPerAdCrownChart(labels) {
         const netProfit = data.grossprofit - data.marketingSpend;
         return netProfit / data.marketingSpend;
     });
+    const chartColors = getChartColors();
 
     const ctx = document.getElementById('netProfitPerAdCrownChart');
     if (!ctx) return;
@@ -2171,6 +2404,7 @@ function updateNetProfitPerAdCrownChart(labels) {
     }
 
     const thresholdData = data.map(() => thresholds.netProfitPerAdCrown);
+    const dataColors = getDataColors();
 
     netProfitPerAdCrownChart = new Chart(ctx, {
         type: 'line',
@@ -2179,8 +2413,8 @@ function updateNetProfitPerAdCrownChart(labels) {
             datasets: [{
                 label: 'Nettovinst per annonskrona',
                 data: data,
-                borderColor: 'rgb(14, 165, 233)',
-                backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                borderColor: dataColors.netProfitPerAdCrown.border,
+                backgroundColor: dataColors.netProfitPerAdCrown.background,
                 borderWidth: 3,
                 fill: true,
                 tension: 0.4
@@ -2219,14 +2453,21 @@ function updateNetProfitPerAdCrownChart(labels) {
             scales: {
                 x: {
                     ticks: {
-                        padding: 0
+                        padding: 0,
+                        maxRotation: 45,
+                        minRotation: 45,
+                        color: chartColors.mutedTextColor
+                    },
+                    grid: {
+                        color: chartColors.gridColor
                     }
                 },
                 y: {
                     beginAtZero: false,
                     title: {
                         display: true,
-                        text: 'Nettovinst per annonskrona (SEK)'
+                        text: 'Nettovinst per annonskrona (SEK)',
+                        color: chartColors.textColor
                     },
                     min: function(context) {
                         const data = context.chart.data.datasets[0].data;
@@ -2237,16 +2478,23 @@ function updateNetProfitPerAdCrownChart(labels) {
                         return Math.min(minValue, thresholdLow) - 0.2;
                     },
                     ticks: {
+                        color: chartColors.mutedTextColor,
                         callback: function(value) {
                             return value.toFixed(2) + ' SEK';
                         }
+                    },
+                    grid: {
+                        color: chartColors.gridColor
                     }
                 }
             },
             plugins: {
                 legend: {
                     display: true,
-                    position: 'top'
+                    position: 'top',
+                    labels: {
+                        color: chartColors.textColor
+                    }
                 },
                 tooltip: {
                     callbacks: {
@@ -2510,8 +2758,14 @@ function showAlert(message, type) {
 // Dark mode functionality
 function initializeDarkMode() {
     const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
+    // Default to dark mode if no preference is saved
+    if (savedTheme === 'light') {
+        document.documentElement.removeAttribute('data-theme');
+        updateThemeToggle(false);
+    } else {
+        // Default to dark mode
         document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
         updateThemeToggle(true);
     }
 }
@@ -2543,6 +2797,38 @@ function updateThemeToggle(isDark) {
     } else {
         toggleButton.innerHTML = '<i class="fas fa-moon me-2"></i>Mörkt Läge';
     }
+}
+
+// Get chart colors based on current theme
+function getChartColors() {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+    return {
+        background: isDark ? '#1e293b' : '#f8fafc',
+        gridColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+        textColor: isDark ? '#e2e8f0' : '#0f172a',
+        mutedTextColor: isDark ? '#a1a9b8' : '#64748b'
+    };
+}
+
+// Standardized data colors - consistent across all charts
+function getDataColors() {
+    return {
+        roas: { border: 'rgb(37, 99, 235)', background: 'rgba(37, 99, 235, 0.1)' }, // Blue
+        poas: { border: 'rgb(22, 163, 74)', background: 'rgba(22, 163, 74, 0.1)' }, // Green
+        grossMarginPercent: { border: 'rgb(234, 179, 8)', background: 'rgba(234, 179, 8, 0.1)' }, // Yellow
+        netProfitPercent: { border: 'rgb(220, 38, 127)', background: 'rgba(220, 38, 127, 0.1)' }, // Pink
+        marketingPercent: { border: 'rgb(14, 165, 233)', background: 'rgba(14, 165, 233, 0.1)' }, // Light Blue
+        revenue: { border: 'rgb(168, 85, 247)', background: 'rgba(168, 85, 247, 0.1)' }, // Purple
+        grossprofit: { border: 'rgb(34, 197, 94)', background: 'rgba(34, 197, 94, 0.1)' }, // Bright Green
+        marketingSpend: { border: 'rgb(239, 68, 68)', background: 'rgba(239, 68, 68, 0.1)' }, // Red
+        nettovinst: { border: 'rgb(217, 119, 6)', background: 'rgba(217, 119, 6, 0.1)' }, // Orange
+        lostMargin: { border: 'rgb(185, 28, 28)', background: 'rgba(185, 28, 28, 0.1)' }, // Dark Red
+        marketingShareOfGrossprofit: { border: 'rgb(139, 69, 19)', background: 'rgba(139, 69, 19, 0.1)' }, // Brown
+        netProfitPerAdCrown: { border: 'rgb(6, 182, 212)', background: 'rgba(6, 182, 212, 0.1)' }, // Cyan
+        thresholdHigh: { border: 'rgba(34, 197, 94, 0.8)', background: 'transparent' }, // Green threshold
+        thresholdLow: { border: 'rgba(239, 68, 68, 0.8)', background: 'transparent' } // Red threshold
+    };
 }
 
 // Update formula threshold text based on current threshold values
