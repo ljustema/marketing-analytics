@@ -295,50 +295,90 @@
 @media (max-width: 768px) {
     .analytics-container {
         padding: 15px;
+        min-height: auto;
     }
-    
+
     .analytics-status {
         grid-template-columns: 1fr;
         gap: 15px;
+        margin-bottom: 20px;
     }
-    
+
     .prediction-results {
         grid-template-columns: 1fr;
         gap: 10px;
     }
-    
+
     .poas-optimizer {
         padding: 20px;
     }
-    
+
     .poas-current-value {
         font-size: 2rem;
     }
-    
+
     .chart-container {
         padding: 20px;
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 576px) {
     .analytics-container {
         padding: 10px;
+        min-height: auto;
     }
-    
+
+    .analytics-status {
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
     .poas-optimizer {
         padding: 15px;
     }
-    
+
     .poas-current-value {
         font-size: 1.8rem;
     }
-    
+
     .prediction-card {
         padding: 15px;
     }
-    
+
     .chart-container {
         padding: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .analytics-container {
+        padding: 8px;
+        min-height: auto;
+    }
+
+    .analytics-status {
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+
+    .poas-optimizer {
+        padding: 12px;
+    }
+
+    .poas-current-value {
+        font-size: 1.6rem;
+    }
+
+    .prediction-card {
+        padding: 12px;
+    }
+
+    .chart-container {
+        padding: 12px;
+    }
+
+    .analytics-status .card {
+        border-radius: 8px;
     }
 }
 

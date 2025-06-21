@@ -37,6 +37,28 @@ body {
     line-height: 1.6;
 }
 
+/* Container optimizations for mobile */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .container-fluid {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .container-fluid {
+        padding-left: 0.25rem;
+        padding-right: 0.25rem;
+    }
+}
+
 /* Header Styles */
 .dashboard-header {
     background: linear-gradient(135deg, hsl(var(--primary-color)) 0%, hsl(var(--info-color)) 100%);
@@ -282,28 +304,299 @@ body {
         margin-top: 1rem;
         text-align: left !important;
     }
-    
+
     .dashboard-tabs .nav-link {
         padding: 0.75rem 1rem;
         font-size: 0.875rem;
     }
-    
+
     .metric-card {
         margin-bottom: 0.5rem;
     }
-    
+
     .chart-card {
         min-height: 400px;
     }
-    
+
     .table-responsive {
         font-size: 0.875rem;
+    }
+}
+
+/* Hamburger menu styles */
+.mobile-menu-toggle {
+    display: none;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    font-size: 1.2rem;
+    cursor: pointer;
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+}
+
+.mobile-menu {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 9999;
+}
+
+.mobile-menu-content {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 280px;
+    height: 100%;
+    background: var(--card-bg);
+    padding: 1rem;
+    overflow-y: auto;
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.mobile-menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mobile-menu-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.mobile-menu-section {
+    margin-bottom: 1.5rem;
+}
+
+.mobile-menu-section h3 {
+    color: white;
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mobile-menu-item {
+    display: block;
+    width: 100%;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.375rem;
+    color: white;
+    text-decoration: none;
+    text-align: left;
+    transition: all 0.2s ease;
+}
+
+.mobile-menu-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    text-decoration: none;
+}
+
+.mobile-menu-item.active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Mobile optimizations - much more compact header */
+@media (max-width: 576px) {
+    /* Show hamburger menu */
+    .mobile-menu-toggle {
+        display: block;
+    }
+
+    /* Hide original buttons and tabs on mobile */
+    .dashboard-header .col-md-4,
+    .dashboard-tabs {
+        display: none !important;
+    }
+
+    /* Much more compact header */
+    .dashboard-header {
+        padding: 0.5rem; /* Even smaller padding */
+        margin: 0.1rem 0 0.25rem 0; /* Much smaller margins */
+        position: relative;
+    }
+
+    .dashboard-header h1 {
+        font-size: 1rem; /* Smaller font size */
+        margin-bottom: 0.1rem; /* Smaller margin */
+        padding-right: 3rem; /* Space for hamburger */
+    }
+
+    .dashboard-header h1 i {
+        font-size: 0.9rem; /* Smaller icon */
+        margin-right: 0.4rem;
+    }
+
+    .dashboard-header p {
+        font-size: 0.75rem; /* Smaller subtitle */
+        margin-bottom: 0 !important;
+    }
+
+    /* Keep metric charts at good height */
+    .chart-card.metric-chart {
+        min-height: 400px;
+        max-height: 450px;
+        margin-bottom: 1rem;
+    }
+
+    /* Main chart section mobile styling - ensure it doesn't overlap */
+    .main-chart-section {
+        margin-bottom: 2rem !important;
+        clear: both !important;
+        position: relative;
+        z-index: 1;
+        overflow: hidden; /* Prevent overflow */
+    }
+
+    /* Main chart should fill card properly and have proper spacing */
+    .chart-card.main-chart {
+        height: auto; /* Auto height to follow content */
+        min-height: auto; /* Remove fixed min-height */
+        margin-bottom: 1rem !important; /* Reduce excessive spacing */
+        clear: both; /* Ensure it clears floating elements */
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Ensure main chart card body is properly sized */
+    .main-chart .card-body {
+        height: auto !important; /* Auto height to follow chart content */
+        min-height: 330px !important; /* Increased minimum height for mobile to accommodate labels */
+        overflow: hidden; /* Clip content to card boundaries */
+        padding: 0.75rem !important; /* Padding to keep chart within bounds */
+        position: relative;
+    }
+
+    /* Mobile-specific height override for main chart container */
+    #trendsChart {
+        height: 280px !important; /* Height for mobile with space for labels */
+    }
+
+    /* Reduce side margins for small charts to use mobile space better */
+    .metric-chart .card-body {
+        padding: 0.5rem 0.5rem; /* Ultra minimal horizontal padding for maximum chart space */
+    }
+
+    .metric-chart .card-header {
+        padding: 0.75rem 0.1rem; /* Ultra minimal horizontal padding */
+    }
+
+    /* Optimize chart width for mobile with compact Y-axis */
+    .metric-chart canvas {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Better mobile container spacing */
+    .container-fluid {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+
+    /* Remove any top margin from body to eliminate header space */
+    body {
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }
+
+    /* Y-axis labels are now visible on mobile with compact styling */
+
+    /* Force proper spacing between sections */
+    .row:has(.main-chart) {
+        margin-top: 1rem !important; /* Reduce gap above main chart */
+        clear: both;
+    }
+
+    /* Ensure metric cards don't overlap main chart */
+    .metric-card {
+        position: relative;
+        z-index: 1;
+    }
+
+    .main-chart {
+        position: relative;
+        z-index: 2;
     }
 }
 
 /* Chart Container - only apply to metric charts, not main chart */
 .metric-chart canvas {
     max-height: 400px;
+}
+
+/* Main chart card styling to ensure proper clipping */
+.main-chart.card {
+    overflow: hidden; /* Clip all content to card boundaries */
+    border-radius: 0.375rem; /* Ensure proper border radius */
+}
+
+/* Main chart container responsive styling */
+.main-chart-container {
+    height: 280px; /* Increased mobile height to accommodate labels */
+    margin-bottom: 0.5rem; /* Space for bottom labels */
+    position: relative;
+    overflow: hidden; /* Ensure chart stays within bounds */
+}
+
+/* Ensure chart canvas respects card boundaries */
+.main-chart-container canvas {
+    max-width: 100% !important;
+    max-height: 100% !important;
+}
+
+/* Desktop main chart styling - ensure it fills container properly */
+@media (min-width: 577px) {
+    .main-chart .card-body {
+        height: 700px !important; /* Much taller height for desktop */
+        min-height: 700px !important;
+        padding: 1rem !important; /* Uniform padding for desktop */
+        overflow: hidden; /* Ensure clipping on desktop too */
+    }
+
+    .main-chart-container {
+        height: 650px; /* Much taller desktop height to fill container */
+        margin-bottom: 1rem; /* Space for bottom labels */
+    }
+
+    #trendsChart {
+        height: 650px !important; /* Much taller height for desktop to fill container */
+    }
+}
+
+/* Mobile chart canvas optimizations */
+@media (max-width: 576px) {
+    /* Keep metric charts at good height - they were good before */
+    .metric-chart canvas {
+        max-height: 350px;
+    }
+
+    /* Ensure main chart fills the card properly */
+    .main-chart canvas {
+        width: 100% !important;
+        height: auto !important;
+        min-height: 350px; /* Minimum height for mobile visibility */
+    }
 }
 
 /* Small chart containers - reduce bottom margin and whitespace */
@@ -328,6 +621,66 @@ body {
 .chart-container {
     margin-bottom: 0 !important;
     padding-bottom: 0 !important;
+}
+
+/* Main chart section styling */
+.main-chart-section {
+    clear: both;
+    margin-top: 1rem; /* Reduce top margin */
+    margin-bottom: 1rem; /* Reduce bottom margin */
+}
+
+/* Mobile spacing improvements */
+@media (max-width: 576px) {
+    /* Ensure metric cards don't float over main chart */
+    .metric-card {
+        position: relative;
+        z-index: 2; /* Higher z-index to stay above main chart */
+        margin-bottom: 1rem;
+        clear: both; /* Ensure proper flow */
+    }
+
+    /* Add spacing after metric card rows but not excessive */
+    .row:has(.metric-card) {
+        margin-bottom: 1rem !important; /* Normal spacing */
+        clear: both;
+        position: relative;
+        z-index: 2;
+    }
+
+    /* Specific spacing for metric card rows */
+    .row.mb-2:has(.metric-card) {
+        margin-bottom: 0.5rem !important; /* Small gap between first and second row */
+        clear: both;
+        position: relative;
+        z-index: 2;
+    }
+
+    .row.mb-4:has(.metric-card) {
+        margin-bottom: 1.5rem !important; /* Moderate gap after second row */
+        clear: both;
+        position: relative;
+        z-index: 2;
+    }
+
+    /* Individual metric charts section - ensure proper spacing */
+    .row:has(.metric-chart) {
+        margin-top: 1rem !important; /* Reduce gap above small charts */
+        clear: both;
+    }
+
+    /* Ensure metric chart cards use full available width */
+    .metric-chart {
+        width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    /* Main chart specific mobile styling */
+    .main-chart {
+        position: relative !important;
+        z-index: 2 !important;
+    }
 }
 
 /* Loading and Empty States */
@@ -453,6 +806,77 @@ body {
     background-color: hsl(var(--surface));
     border-color: hsl(var(--border));
     color: hsl(var(--text-primary));
+}
+
+/* Predictive Analytics dark mode fixes */
+[data-theme="dark"] .analytics-container {
+    background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--surface)) 100%);
+}
+
+[data-theme="dark"] .analytics-status .card {
+    background-color: hsl(var(--surface));
+    border-color: hsl(var(--border));
+}
+
+[data-theme="dark"] .chart-container {
+    background-color: hsl(var(--surface));
+}
+
+/* Fix card data values in dark mode - keep colors visible */
+[data-theme="dark"] .text-primary {
+    color: #60a5fa !important; /* Light blue for primary values */
+}
+
+[data-theme="dark"] .text-success {
+    color: #4ade80 !important; /* Light green for positive values */
+}
+
+[data-theme="dark"] .text-danger {
+    color: #f87171 !important; /* Light red for negative values */
+}
+
+[data-theme="dark"] .text-warning {
+    color: #fbbf24 !important; /* Light yellow for warning values */
+}
+
+[data-theme="dark"] .text-info {
+    color: #38bdf8 !important; /* Light cyan for info values */
+}
+
+[data-theme="dark"] .text-muted {
+    color: hsl(var(--text-secondary)) !important;
+}
+
+/* Fix prediction table in dark mode */
+[data-theme="dark"] #predictive-analytics .table,
+[data-theme="dark"] #predictive-analytics .table-responsive .table {
+    color: hsl(var(--text-primary)) !important;
+    background-color: hsl(var(--surface)) !important;
+}
+
+[data-theme="dark"] #predictive-analytics .table th,
+[data-theme="dark"] #predictive-analytics .table-responsive .table th {
+    color: hsl(var(--text-primary)) !important;
+    background-color: hsl(var(--background)) !important;
+    border-color: hsl(var(--border)) !important;
+}
+
+[data-theme="dark"] #predictive-analytics .table td,
+[data-theme="dark"] #predictive-analytics .table-responsive .table td {
+    color: hsl(var(--text-primary)) !important;
+    background-color: hsl(var(--surface)) !important;
+    border-color: hsl(var(--border)) !important;
+}
+
+[data-theme="dark"] #predictive-analytics .table-primary > td,
+[data-theme="dark"] #predictive-analytics .table-responsive .table-primary > td {
+    background-color: hsl(var(--primary) / 0.2) !important;
+    border-color: hsl(var(--border)) !important;
+}
+
+[data-theme="dark"] #predictive-analytics .table tbody tr,
+[data-theme="dark"] #predictive-analytics .table-responsive .table tbody tr {
+    background-color: hsl(var(--surface)) !important;
 }
 
 [data-theme="dark"] .form-control:focus {

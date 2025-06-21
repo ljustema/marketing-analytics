@@ -3,6 +3,11 @@
  * Advanced charts and visualizations for POAS optimization
  */
 
+// Register Chart.js annotation plugin
+if (typeof Chart !== 'undefined' && typeof window.chartjsPluginAnnotation !== 'undefined') {
+    Chart.register(window.chartjsPluginAnnotation);
+}
+
 class POASCharts {
     constructor() {
         this.charts = {};
@@ -28,6 +33,26 @@ class POASCharts {
             textColor: isDark ? '#e2e8f0' : '#0f172a',
             mutedTextColor: isDark ? '#a1a9b8' : '#64748b'
         };
+    }
+
+    /**
+     * Get theme-aware data colors
+     */
+    getDataColors() {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+        if (isDark) {
+            return {
+                primary: '#60a5fa',
+                success: '#4ade80',
+                warning: '#fbbf24',
+                danger: '#f87171',
+                info: '#38bdf8',
+                secondary: '#94a3b8'
+            };
+        } else {
+            return this.colors;
+        }
     }
 
     /**
@@ -65,49 +90,23 @@ class POASCharts {
         const maxProfitIndex = netProfitPredictions.indexOf(Math.max(...netProfitPredictions));
         const optimalPOAS = poasRange[maxProfitIndex];
 
+        const chartColors = this.getChartColors();
+        const dataColors = this.getDataColors();
+
         this.charts[containerId] = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: poasRange.map(p => p.toFixed(1)),
                 datasets: [{
-                    label: 'Förutsagd Nettovinst (SEK)',
+                    label: 'Nettovinst',
                     data: netProfitPredictions,
-                    borderColor: this.colors.primary,
-                    backgroundColor: this.colors.primary + '20',
+                    borderColor: dataColors.primary,
+                    backgroundColor: dataColors.primary + '20',
                     borderWidth: 3,
                     fill: true,
                     tension: 0.4,
                     pointRadius: 4,
                     pointHoverRadius: 6
-                }, {
-                    label: 'Nuvarande POAS',
-                    data: new Array(poasRange.length).fill(null),
-                    borderColor: this.colors.warning,
-                    backgroundColor: this.colors.warning,
-                    borderWidth: 2,
-                    pointRadius: 0,
-                    showLine: false,
-                    // Add vertical line at current POAS
-                    pointBackgroundColor: poasRange.map(p => 
-                        Math.abs(p - currentPOAS) < 0.05 ? this.colors.warning : 'transparent'
-                    ),
-                    pointRadius: poasRange.map(p => 
-                        Math.abs(p - currentPOAS) < 0.05 ? 8 : 0
-                    )
-                }, {
-                    label: 'Optimal POAS',
-                    data: new Array(poasRange.length).fill(null),
-                    borderColor: this.colors.success,
-                    backgroundColor: this.colors.success,
-                    borderWidth: 2,
-                    pointRadius: 0,
-                    showLine: false,
-                    pointBackgroundColor: poasRange.map(p => 
-                        Math.abs(p - optimalPOAS) < 0.05 ? this.colors.success : 'transparent'
-                    ),
-                    pointRadius: poasRange.map(p => 
-                        Math.abs(p - optimalPOAS) < 0.05 ? 8 : 0
-                    )
                 }]
             },
             options: {
@@ -116,14 +115,23 @@ class POASCharts {
                 plugins: {
                     title: {
                         display: true,
-                        text: 'POAS Optimering - Nettovinst Förutsägelse',
-                        font: { size: 16, weight: 'bold' }
+                        text: 'POAS Optimeringsanalys',
+                        font: { size: 16, weight: 'bold' },
+                        color: chartColors.textColor
                     },
                     legend: {
                         display: true,
-                        position: 'top'
+                        position: 'top',
+                        labels: {
+                            color: chartColors.textColor
+                        }
                     },
                     tooltip: {
+                        backgroundColor: chartColors.background,
+                        titleColor: chartColors.textColor,
+                        bodyColor: chartColors.textColor,
+                        borderColor: chartColors.gridColor,
+                        borderWidth: 1,
                         callbacks: {
                             label: function(context) {
                                 if (context.datasetIndex === 0) {
@@ -132,32 +140,80 @@ class POASCharts {
                                 return context.dataset.label;
                             }
                         }
+                    },
+                    annotation: {
+                        annotations: {
+                            currentPOAS: {
+                                type: 'line',
+                                xMin: currentPOAS,
+                                xMax: currentPOAS,
+                                borderColor: dataColors.warning,
+                                borderWidth: 3,
+                                borderDash: [5, 5],
+                                label: {
+                                    content: `Nuvarande: ${currentPOAS.toFixed(1)}`,
+                                    enabled: true,
+                                    position: 'top',
+                                    backgroundColor: dataColors.warning,
+                                    color: '#ffffff',
+                                    font: {
+                                        size: 11,
+                                        weight: 'bold'
+                                    }
+                                }
+                            },
+                            optimalPOAS: {
+                                type: 'line',
+                                xMin: optimalPOAS,
+                                xMax: optimalPOAS,
+                                borderColor: dataColors.success,
+                                borderWidth: 3,
+                                borderDash: [5, 5],
+                                label: {
+                                    content: `Optimal: ${optimalPOAS.toFixed(1)}`,
+                                    enabled: true,
+                                    position: 'top',
+                                    backgroundColor: dataColors.success,
+                                    color: '#ffffff',
+                                    font: {
+                                        size: 11,
+                                        weight: 'bold'
+                                    }
+                                }
+                            }
+                        }
                     }
                 },
                 scales: {
                     x: {
                         title: {
                             display: true,
-                            text: 'POAS Värde'
+                            text: 'POAS Värde',
+                            color: chartColors.textColor
+                        },
+                        ticks: {
+                            color: chartColors.mutedTextColor
                         },
                         grid: {
                             display: true,
-                            color: 'rgba(0,0,0,0.1)'
+                            color: chartColors.gridColor
                         }
                     },
                     y: {
                         title: {
                             display: true,
-                            text: 'Nettovinst (SEK)'
+                            text: 'Nettovinst (SEK)',
+                            color: chartColors.textColor
                         },
                         ticks: {
+                            color: chartColors.mutedTextColor,
                             callback: function(value) {
                                 return POASUtils.formatNumber(value, 0);
                             }
                         },
                         grid: {
                             display: true,
-                            color: 'rgba(0,0,0,0.1)'
+                            color: chartColors.gridColor
                         }
                     }
                 },
@@ -185,23 +241,41 @@ class POASCharts {
         }
 
         const scenarios = ['Nuvarande', 'POAS 2.5', 'POAS 3.0', 'POAS 3.5', 'POAS 4.0'];
+
+        // Extract data with better error handling
         const netProfits = [
-            currentData.avgNetProfit,
-            predictions['2.5']?.prediction.netProfit || 0,
-            predictions['3.0']?.prediction.netProfit || 0,
-            predictions['3.5']?.prediction.netProfit || 0,
-            predictions['4.0']?.prediction.netProfit || 0
+            currentData.avgNetProfit || 0,
+            predictions['2.5']?.prediction?.netProfit || 0,
+            predictions['3.0']?.prediction?.netProfit || 0,
+            predictions['3.5']?.prediction?.netProfit || 0,
+            predictions['4.0']?.prediction?.netProfit || 0
         ];
 
         const marketingSpends = [
-            currentData.avgMarketingSpend,
-            predictions['2.5']?.prediction.marketingSpend || 0,
-            predictions['3.0']?.prediction.marketingSpend || 0,
-            predictions['3.5']?.prediction.marketingSpend || 0,
-            predictions['4.0']?.prediction.marketingSpend || 0
+            currentData.avgMarketingSpend || 0,
+            predictions['2.5']?.prediction?.marketingSpend || 0,
+            predictions['3.0']?.prediction?.marketingSpend || 0,
+            predictions['3.5']?.prediction?.marketingSpend || 0,
+            predictions['4.0']?.prediction?.marketingSpend || 0
         ];
 
+        console.log('Scenario chart data:', {
+            scenarios,
+            netProfits,
+            marketingSpends,
+            currentData,
+            predictions
+        });
+
+        // Validate data
+        const hasValidData = netProfits.some(val => val > 0) && marketingSpends.some(val => val > 0);
+        if (!hasValidData) {
+            console.warn('No valid data for scenario chart');
+            return null;
+        }
+
         const chartColors = this.getChartColors();
+        const dataColors = this.getDataColors();
 
         this.charts[containerId] = new Chart(ctx, {
             type: 'bar',
@@ -210,15 +284,15 @@ class POASCharts {
                 datasets: [{
                     label: 'Nettovinst (SEK)',
                     data: netProfits,
-                    backgroundColor: this.colors.primary + '80',
-                    borderColor: this.colors.primary,
+                    backgroundColor: dataColors.primary + '80',
+                    borderColor: dataColors.primary,
                     borderWidth: 2,
                     yAxisID: 'y'
                 }, {
                     label: 'Marknadsföring (SEK)',
                     data: marketingSpends,
-                    backgroundColor: this.colors.warning + '80',
-                    borderColor: this.colors.warning,
+                    backgroundColor: dataColors.warning + '80',
+                    borderColor: dataColors.warning,
                     borderWidth: 2,
                     yAxisID: 'y1'
                 }]
@@ -340,6 +414,9 @@ class POASCharts {
             return poasTrend.slope * index + (poasData[0] - poasTrend.slope * 0);
         });
 
+        const chartColors = this.getChartColors();
+        const dataColors = this.getDataColors();
+
         this.charts[containerId] = new Chart(ctx, {
             type: 'line',
             data: {
@@ -347,8 +424,8 @@ class POASCharts {
                 datasets: [{
                     label: 'POAS Historik',
                     data: poasData,
-                    borderColor: this.colors.primary,
-                    backgroundColor: this.colors.primary + '20',
+                    borderColor: dataColors.primary,
+                    backgroundColor: dataColors.primary + '20',
                     borderWidth: 3,
                     fill: false,
                     tension: 0.4,
@@ -356,7 +433,7 @@ class POASCharts {
                 }, {
                     label: 'POAS Trend',
                     data: trendLine,
-                    borderColor: this.colors.secondary,
+                    borderColor: dataColors.secondary,
                     backgroundColor: 'transparent',
                     borderWidth: 2,
                     borderDash: [5, 5],
@@ -366,8 +443,8 @@ class POASCharts {
                 }, {
                     label: 'Nettovinst (SEK)',
                     data: netProfitData,
-                    borderColor: this.colors.success,
-                    backgroundColor: this.colors.success + '20',
+                    borderColor: dataColors.success,
+                    backgroundColor: dataColors.success + '20',
                     borderWidth: 2,
                     fill: false,
                     tension: 0.4,
@@ -381,18 +458,36 @@ class POASCharts {
                     title: {
                         display: true,
                         text: 'Historisk POAS Prestanda & Trender',
-                        font: { size: 16, weight: 'bold' }
+                        font: { size: 16, weight: 'bold' },
+                        color: chartColors.textColor
                     },
                     legend: {
                         display: true,
-                        position: 'top'
+                        position: 'top',
+                        labels: {
+                            color: chartColors.textColor
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: chartColors.background,
+                        titleColor: chartColors.textColor,
+                        bodyColor: chartColors.textColor,
+                        borderColor: chartColors.gridColor,
+                        borderWidth: 1
                     }
                 },
                 scales: {
                     x: {
                         title: {
                             display: true,
-                            text: 'Månad'
+                            text: 'Månad',
+                            color: chartColors.textColor
+                        },
+                        ticks: {
+                            color: chartColors.mutedTextColor
+                        },
+                        grid: {
+                            color: chartColors.gridColor
                         }
                     },
                     y: {
@@ -401,7 +496,14 @@ class POASCharts {
                         position: 'left',
                         title: {
                             display: true,
-                            text: 'POAS Värde'
+                            text: 'POAS Värde',
+                            color: chartColors.textColor
+                        },
+                        ticks: {
+                            color: chartColors.mutedTextColor
+                        },
+                        grid: {
+                            color: chartColors.gridColor
                         }
                     },
                     y1: {
@@ -410,9 +512,11 @@ class POASCharts {
                         position: 'right',
                         title: {
                             display: true,
-                            text: 'Nettovinst (SEK)'
+                            text: 'Nettovinst (SEK)',
+                            color: chartColors.textColor
                         },
                         ticks: {
+                            color: chartColors.mutedTextColor,
                             callback: function(value) {
                                 return POASUtils.formatNumber(value, 0);
                             }

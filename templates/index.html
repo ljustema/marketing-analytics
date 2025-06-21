@@ -12,6 +12,9 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js Annotation Plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
     <!-- Custom CSS -->
     <link rel="stylesheet" href="src/styles.css">
     <!-- POAS Analytics CSS -->
@@ -20,7 +23,7 @@
 <body>
     <div class="container-fluid">
         <!-- Header -->
-        <header class="dashboard-header py-4 mb-4">
+        <header class="dashboard-header py-3 mb-2">
             <div class="row align-items-center">
                 <div class="col-md-8">
                     <h1 class="h2 mb-0">
@@ -52,7 +55,56 @@
                     </button>
                 </div>
             </div>
+
+            <!-- Mobile Hamburger Menu Toggle -->
+            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
         </header>
+
+        <!-- Mobile Menu Overlay -->
+        <div class="mobile-menu" id="mobileMenu" onclick="closeMobileMenu()">
+            <div class="mobile-menu-content" onclick="event.stopPropagation()">
+                <div class="mobile-menu-header">
+                    <h5 class="mb-0">Menu</h5>
+                    <button class="mobile-menu-close" onclick="closeMobileMenu()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="mobile-menu-section">
+                    <h3>Navigation</h3>
+                    <a href="#" class="mobile-menu-item active" onclick="switchTab('analytics'); closeMobileMenu();">
+                        <i class="fas fa-chart-area me-2"></i>Analytics Dashboard
+                    </a>
+                    <a href="#" class="mobile-menu-item" onclick="switchTab('data-manager'); closeMobileMenu();">
+                        <i class="fas fa-database me-2"></i>Data Manager
+                    </a>
+                    <a href="#" class="mobile-menu-item" onclick="switchTab('formulas'); closeMobileMenu();">
+                        <i class="fas fa-calculator me-2"></i>Formler
+                    </a>
+                    <a href="#" class="mobile-menu-item" onclick="switchTab('simulator'); closeMobileMenu();">
+                        <i class="fas fa-calculator me-2"></i>POAS Simulator <span class="badge bg-warning text-dark ms-1">BETA</span>
+                    </a>
+                    <a href="#" class="mobile-menu-item" onclick="switchTab('predictive-analytics'); closeMobileMenu();">
+                        <i class="fas fa-brain me-2"></i>Prediktiv Analys <span class="badge bg-warning text-dark ms-1">BETA</span>
+                    </a>
+                </div>
+
+                <div class="mobile-menu-section">
+                    <h3>Actions</h3>
+                    <button class="mobile-menu-item" onclick="toggleDarkMode(); closeMobileMenu();">
+                        <i class="fas fa-moon me-2"></i><span id="mobileThemeText">Mörkt Läge</span>
+                    </button>
+                    <button class="mobile-menu-item" onclick="exportData(); closeMobileMenu();">
+                        <i class="fas fa-download me-2"></i>Exportera Data
+                    </button>
+                    <button class="mobile-menu-item" onclick="logout(); closeMobileMenu();">
+                        <i class="fas fa-sign-out-alt me-2"></i>Logga ut
+                    </button>
+                </div>
+            </div>
+        </div>
 
         <!-- Navigation Tabs -->
         <ul class="nav nav-tabs dashboard-tabs mb-4" id="dashboardTabs" role="tablist">
@@ -87,99 +139,101 @@
         <div class="tab-content" id="dashboardTabContent">
             <!-- Analytics Dashboard Tab -->
             <div class="tab-pane fade show active" id="analytics" role="tabpanel">
-                <!-- Main Chart - Full Width -->
-                <div class="row mb-4">
-                    <div class="col-12">
-                        <div class="card chart-card main-chart">
-                            <div class="card-header">
-                                <div class="row align-items-center">
-                                    <div class="col-md-8">
-                                        <h5 class="card-title mb-0">
-                                            <i class="fas fa-chart-line me-2"></i>Huvudöversikt - Alla Metriker
-                                        </h5>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label fw-bold mb-1">📅 Analysperiod:</label>
-                                        <select class="form-select form-select-sm" id="analysisPeriod">
-                                            <option value="all">Sedan start</option>
-                                            <option value="currentYear">Hittills detta året</option>
-                                            <option value="lastYear">Förra året</option>
-                                            <option value="last3Months">Senaste 3 månaderna</option>
-                                            <option value="last6Months">Senaste 6 månaderna</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-body" style="height: 650px;">
-                                <div class="chart-controls mb-3">
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <label class="form-label fw-bold text-primary">📊 Nyckeltal:</label>
-                                            <div class="d-flex flex-column gap-1">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" id="showROAS" checked>
-                                                    <label class="form-check-label" for="showROAS">ROAS</label>
-                                                </div>
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" id="showPOAS" checked>
-                                                    <label class="form-check-label" for="showPOAS">POAS</label>
-                                                </div>
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" id="showMarketingShareOfGrossprofit">
-                                                    <label class="form-check-label" for="showMarketingShareOfGrossprofit">Marknadsföringens andel av bruttovinsten (%)</label>
-                                                </div>
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" id="showNetProfitPerAdCrown">
-                                                    <label class="form-check-label" for="showNetProfitPerAdCrown">Nettovinst per annonskrona</label>
-                                                </div>
-                                            </div>
+                <!-- Main Chart Section - At Top -->
+                <div class="main-chart-section mb-4">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card chart-card main-chart">
+                                <div class="card-header">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-8">
+                                            <h5 class="card-title mb-0">
+                                                <i class="fas fa-chart-line me-2"></i>Huvudöversikt - Alla Metriker
+                                            </h5>
                                         </div>
                                         <div class="col-md-4">
-                                            <label class="form-label fw-bold text-warning">📈 Procent:</label>
-                                            <div class="d-flex flex-column gap-1">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" id="showgrossMarginPercent">
-                                                    <label class="form-check-label" for="showgrossMarginPercent">Bruttovinst % (Utan marknadsföring)</label>
-                                                </div>
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" id="showNetProfitPercent">
-                                                    <label class="form-check-label" for="showNetProfitPercent">Nettovinst % (Med marknadsföring)</label>
-                                                </div>
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" id="showMarketingPercent">
-                                                    <label class="form-check-label" for="showMarketingPercent">Marknadsföring %</label>
-                                                </div>
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" id="showLostMargin">
-                                                    <label class="form-check-label" for="showLostMargin">Förlorad marginal (%)</label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label class="form-label fw-bold text-success">💰 Belopp (SEK):</label>
-                                            <div class="d-flex flex-column gap-1">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" id="showrevenue">
-                                                    <label class="form-check-label" for="showrevenue">Omsättning SEK</label>
-                                                </div>
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" id="showgrossprofit">
-                                                    <label class="form-check-label" for="showgrossprofit">Bruttovinst SEK</label>
-                                                </div>
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" id="showMarknadsföring">
-                                                    <label class="form-check-label" for="showMarknadsföring">Marknadsföring SEK</label>
-                                                </div>
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" id="showNettovinst">
-                                                    <label class="form-check-label" for="showNettovinst">Nettovinst SEK</label>
-                                                </div>
-                                            </div>
+                                            <label class="form-label fw-bold mb-1">📅 Analysperiod:</label>
+                                            <select class="form-select form-select-sm" id="analysisPeriod">
+                                                <option value="all">Sedan start</option>
+                                                <option value="currentYear">Hittills detta året</option>
+                                                <option value="lastYear">Förra året</option>
+                                                <option value="last3Months">Senaste 3 månaderna</option>
+                                                <option value="last6Months">Senaste 6 månaderna</option>
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
-                                <div style="height: 600px;">
-                                    <canvas id="trendsChart"></canvas>
+                                <div class="card-body" style="height: 650px;">
+                                    <div class="chart-controls mb-3">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <label class="form-label fw-bold text-primary">📊 Nyckeltal:</label>
+                                                <div class="d-flex flex-column gap-1">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="showROAS" checked>
+                                                        <label class="form-check-label" for="showROAS">ROAS</label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="showPOAS" checked>
+                                                        <label class="form-check-label" for="showPOAS">POAS</label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="showMarketingShareOfGrossprofit">
+                                                        <label class="form-check-label" for="showMarketingShareOfGrossprofit">Marknadsföringens andel av bruttovinsten (%)</label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="showNetProfitPerAdCrown">
+                                                        <label class="form-check-label" for="showNetProfitPerAdCrown">Nettovinst per annonskrona</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label fw-bold text-warning">📈 Procent:</label>
+                                                <div class="d-flex flex-column gap-1">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="showgrossMarginPercent">
+                                                        <label class="form-check-label" for="showgrossMarginPercent">Bruttovinst % (Utan marknadsföring)</label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="showNetProfitPercent">
+                                                        <label class="form-check-label" for="showNetProfitPercent">Nettovinst % (Med marknadsföring)</label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="showMarketingPercent">
+                                                        <label class="form-check-label" for="showMarketingPercent">Marknadsföring %</label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="showLostMargin">
+                                                        <label class="form-check-label" for="showLostMargin">Förlorad marginal (%)</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label fw-bold text-success">💰 Belopp (SEK):</label>
+                                                <div class="d-flex flex-column gap-1">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="showrevenue">
+                                                        <label class="form-check-label" for="showrevenue">Omsättning SEK</label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="showgrossprofit">
+                                                        <label class="form-check-label" for="showgrossprofit">Bruttovinst SEK</label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="showMarknadsföring">
+                                                        <label class="form-check-label" for="showMarknadsföring">Marknadsföring SEK</label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="showNettovinst">
+                                                        <label class="form-check-label" for="showNettovinst">Nettovinst SEK</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="main-chart-container">
+                                        <canvas id="trendsChart"></canvas>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -325,7 +379,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Individual Metric Charts -->
                 <div class="row">
                     <div class="col-md-6 mb-2">

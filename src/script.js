@@ -90,6 +90,18 @@ document.addEventListener('DOMContentLoaded', async function() {
     updateFormulaThresholds(); // Initialize formula thresholds
 });
 
+// Add resize listener to update charts when window size changes
+let resizeTimeout;
+window.addEventListener('resize', function() {
+    // Debounce the resize event to avoid too many updates
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(function() {
+        // Update all charts with new mobile settings
+        updateTrendsChart();
+        updateIndividualCharts();
+    }, 250);
+});
+
 // Initialize POAS Analytics system
 async function initializePOASAnalytics() {
     try {
@@ -1094,111 +1106,121 @@ function updateTrendsChart() {
     
     const chartColors = getChartColors();
 
+    const baseOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: {
+            padding: {
+                left: 8,
+                right: 8,
+                top: 8,
+                bottom: 20 // Extra bottom padding for x-axis labels
+            }
+        },
+        interaction: {
+            mode: 'index',
+            intersect: false,
+        },
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top',
+                labels: {
+                    color: chartColors.textColor
+                }
+            },
+            tooltip: {
+                backgroundColor: chartColors.background,
+                titleColor: chartColors.textColor,
+                bodyColor: chartColors.textColor,
+                borderColor: chartColors.gridColor,
+                borderWidth: 1,
+                callbacks: {
+                    afterLabel: function(context) {
+                        const dataIndex = context.dataIndex;
+                        const data = filteredData[dataIndex];
+                        return [
+                            `Omsättning: ${formatCurrency(data.revenue)}`,
+                            `Bruttovinst: ${formatCurrency(data.grossprofit)}`,
+                            `Marknadsföring: ${formatCurrency(data.marketingSpend)}`
+                        ];
+                    }
+                }
+            }
+        },
+        scales: {
+            x: {
+                display: true,
+                title: {
+                    display: true,
+                    text: 'Månad',
+                    color: chartColors.textColor
+                },
+                ticks: {
+                    color: chartColors.mutedTextColor
+                },
+                grid: {
+                    color: chartColors.gridColor
+                }
+            },
+            y: {
+                type: 'linear',
+                display: true,
+                position: 'left',
+                title: {
+                    display: true,
+                    text: 'ROAS / POAS',
+                    color: chartColors.textColor
+                },
+                ticks: {
+                    color: chartColors.mutedTextColor
+                },
+                grid: {
+                    color: chartColors.gridColor
+                }
+            },
+            y1: {
+                type: 'linear',
+                display: true,
+                position: 'right',
+                title: {
+                    display: true,
+                    text: 'Procent (%)',
+                    color: chartColors.textColor
+                },
+                ticks: {
+                    color: chartColors.mutedTextColor
+                },
+                grid: {
+                    drawOnChartArea: false,
+                },
+            },
+            y2: {
+                type: 'linear',
+                display: false,
+                position: 'right',
+                title: {
+                    display: true,
+                    text: 'SEK',
+                    color: chartColors.textColor
+                },
+                ticks: {
+                    color: chartColors.mutedTextColor
+                },
+                grid: {
+                    drawOnChartArea: false,
+                },
+            }
+        }
+    };
+
     trendsChart = new Chart(ctx, {
         type: 'line',
         data: {
             labels: labels,
             datasets: datasets
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: {
-                mode: 'index',
-                intersect: false,
-            },
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'top',
-                    labels: {
-                        color: chartColors.textColor
-                    }
-                },
-                tooltip: {
-                    backgroundColor: chartColors.background,
-                    titleColor: chartColors.textColor,
-                    bodyColor: chartColors.textColor,
-                    borderColor: chartColors.gridColor,
-                    borderWidth: 1,
-                    callbacks: {
-                        afterLabel: function(context) {
-                            const dataIndex = context.dataIndex;
-                            const data = filteredData[dataIndex];
-                            return [
-                                `Omsättning: ${formatCurrency(data.revenue)}`,
-                                `Bruttovinst: ${formatCurrency(data.grossprofit)}`,
-                                `Marknadsföring: ${formatCurrency(data.marketingSpend)}`
-                            ];
-                        }
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    display: true,
-                    title: {
-                        display: true,
-                        text: 'Månad',
-                        color: chartColors.textColor
-                    },
-                    ticks: {
-                        color: chartColors.mutedTextColor
-                    },
-                    grid: {
-                        color: chartColors.gridColor
-                    }
-                },
-                y: {
-                    type: 'linear',
-                    display: true,
-                    position: 'left',
-                    title: {
-                        display: true,
-                        text: 'ROAS / POAS',
-                        color: chartColors.textColor
-                    },
-                    ticks: {
-                        color: chartColors.mutedTextColor
-                    },
-                    grid: {
-                        color: chartColors.gridColor
-                    }
-                },
-                y1: {
-                    type: 'linear',
-                    display: true,
-                    position: 'right',
-                    title: {
-                        display: true,
-                        text: 'Procent (%)',
-                        color: chartColors.textColor
-                    },
-                    ticks: {
-                        color: chartColors.mutedTextColor
-                    },
-                    grid: {
-                        drawOnChartArea: false,
-                    },
-                },
-                y2: {
-                    type: 'linear',
-                    display: false,
-                    position: 'right',
-                    title: {
-                        display: true,
-                        text: 'SEK',
-                        color: chartColors.textColor
-                    },
-                    ticks: {
-                        color: chartColors.mutedTextColor
-                    },
-                    grid: {
-                        drawOnChartArea: false,
-                    },
-                }
-            }
-        }
+        options: getMobileChartOptions(baseOptions)
     });
 }
 
@@ -1248,6 +1270,53 @@ function updateROASChart(labels) {
     const chartColors = getChartColors();
     const dataColors = getDataColors();
 
+    const baseOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top',
+                labels: {
+                    color: chartColors.textColor
+                }
+            }
+        },
+        scales: {
+            x: {
+                ticks: {
+                    maxRotation: 45,
+                    minRotation: 45,
+                    color: chartColors.mutedTextColor
+                },
+                grid: {
+                    color: chartColors.gridColor
+                }
+            },
+            y: {
+                beginAtZero: false,
+                title: {
+                    display: true,
+                    text: 'ROAS',
+                    color: chartColors.textColor
+                },
+                ticks: {
+                    color: chartColors.mutedTextColor
+                },
+                grid: {
+                    color: chartColors.gridColor
+                },
+                min: function(context) {
+                    const data = context.chart.data.datasets[0].data;
+                    const minValue = Math.min(...data);
+                    const thresholdLow = thresholds.roas.low;
+                    // Start axis at 0.2 below the lower of: minimum data value or low threshold
+                    return Math.max(0, Math.min(minValue, thresholdLow) - 0.2);
+                }
+            }
+        }
+    };
+
     roasChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -1280,52 +1349,7 @@ function updateROASChart(labels) {
                 fill: false
             }]
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'top',
-                    labels: {
-                        color: chartColors.textColor
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    ticks: {
-                        maxRotation: 45,
-                        minRotation: 45,
-                        color: chartColors.mutedTextColor
-                    },
-                    grid: {
-                        color: chartColors.gridColor
-                    }
-                },
-                y: {
-                    beginAtZero: false,
-                    title: {
-                        display: true,
-                        text: 'ROAS',
-                        color: chartColors.textColor
-                    },
-                    ticks: {
-                        color: chartColors.mutedTextColor
-                    },
-                    grid: {
-                        color: chartColors.gridColor
-                    },
-                    min: function(context) {
-                        const data = context.chart.data.datasets[0].data;
-                        const minValue = Math.min(...data);
-                        const thresholdLow = thresholds.roas.low;
-                        // Start axis at 0.2 below the lower of: minimum data value or low threshold
-                        return Math.max(0, Math.min(minValue, thresholdLow) - 0.2);
-                    }
-                }
-            }
-        }
+        options: getMobileChartOptions(baseOptions)
     });
 }
 
@@ -1341,6 +1365,59 @@ function updatePOASChart(labels) {
     const data = filteredData.map(data => data.poas);
     const chartColors = getChartColors();
     const dataColors = getDataColors();
+
+    const baseOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: {
+            padding: {
+                bottom: 0
+            }
+        },
+        scales: {
+            x: {
+                ticks: {
+                    padding: 0,
+                    maxRotation: 45,
+                    minRotation: 45,
+                    color: chartColors.mutedTextColor
+                },
+                grid: {
+                    color: chartColors.gridColor
+                }
+            },
+            y: {
+                beginAtZero: false,
+                title: {
+                    display: true,
+                    text: 'POAS',
+                    color: chartColors.textColor
+                },
+                ticks: {
+                    color: chartColors.mutedTextColor
+                },
+                grid: {
+                    color: chartColors.gridColor
+                },
+                min: function(context) {
+                    const data = context.chart.data.datasets[0].data;
+                    const minValue = Math.min(...data);
+                    const thresholdLow = thresholds.poas.low;
+                    // Start axis at 0.2 below the lower of: minimum data value or low threshold
+                    return Math.max(0, Math.min(minValue, thresholdLow) - 0.2);
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top',
+                labels: {
+                    color: chartColors.textColor
+                }
+            }
+        }
+    };
 
     poasChart = new Chart(ctx, {
         type: 'line',
@@ -1374,58 +1451,7 @@ function updatePOASChart(labels) {
                 fill: false
             }]
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            layout: {
-                padding: {
-                    bottom: 0
-                }
-            },
-            scales: {
-                x: {
-                    ticks: {
-                        padding: 0,
-                        maxRotation: 45,
-                        minRotation: 45,
-                        color: chartColors.mutedTextColor
-                    },
-                    grid: {
-                        color: chartColors.gridColor
-                    }
-                },
-                y: {
-                    beginAtZero: false,
-                    title: {
-                        display: true,
-                        text: 'POAS',
-                        color: chartColors.textColor
-                    },
-                    ticks: {
-                        color: chartColors.mutedTextColor
-                    },
-                    grid: {
-                        color: chartColors.gridColor
-                    },
-                    min: function(context) {
-                        const data = context.chart.data.datasets[0].data;
-                        const minValue = Math.min(...data);
-                        const thresholdLow = thresholds.poas.low;
-                        // Start axis at 0.2 below the lower of: minimum data value or low threshold
-                        return Math.max(0, Math.min(minValue, thresholdLow) - 0.2);
-                    }
-                }
-            },
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'top',
-                    labels: {
-                        color: chartColors.textColor
-                    }
-                }
-            }
-        }
+        options: getMobileChartOptions(baseOptions)
     });
 }
 
@@ -1474,7 +1500,7 @@ function updategrossMarginPercentChart(labels) {
                 fill: false
             }]
         },
-        options: {
+        options: getMobileChartOptions({
             responsive: true,
             maintainAspectRatio: false,
             layout: {
@@ -1525,7 +1551,7 @@ function updategrossMarginPercentChart(labels) {
                     }
                 }
             }
-        }
+        })
     });
 }
 
@@ -1574,7 +1600,7 @@ function updateNetProfitPercentChart(labels) {
                 fill: false
             }]
         },
-        options: {
+        options: getMobileChartOptions({
             responsive: true,
             maintainAspectRatio: false,
             layout: {
@@ -1626,7 +1652,7 @@ function updateNetProfitPercentChart(labels) {
                     }
                 }
             }
-        }
+        })
     });
 }
 
@@ -1675,7 +1701,7 @@ function updateMarketingPercentChart(labels) {
                 fill: false
             }]
         },
-        options: {
+        options: getMobileChartOptions({
             responsive: true,
             maintainAspectRatio: false,
             layout: {
@@ -1726,7 +1752,7 @@ function updateMarketingPercentChart(labels) {
                     }
                 }
             }
-        }
+        })
     });
 }
 
@@ -1775,7 +1801,7 @@ function updaterevenueChart(labels) {
                 fill: false
             }]
         },
-        options: {
+        options: getMobileChartOptions({
             responsive: true,
             maintainAspectRatio: false,
             layout: {
@@ -1821,7 +1847,7 @@ function updaterevenueChart(labels) {
                     }
                 }
             }
-        }
+        })
     });
 }
 
@@ -1870,7 +1896,7 @@ function updategrossprofitChart(labels) {
                 fill: false
             }]
         },
-        options: {
+        options: getMobileChartOptions({
             responsive: true,
             maintainAspectRatio: false,
             layout: {
@@ -1916,7 +1942,7 @@ function updategrossprofitChart(labels) {
                     }
                 }
             }
-        }
+        })
     });
 }
 
@@ -1965,7 +1991,7 @@ function updatemarketingSpendChart(labels) {
                 fill: false
             }]
         },
-        options: {
+        options: getMobileChartOptions({
             responsive: true,
             maintainAspectRatio: false,
             layout: {
@@ -2011,7 +2037,7 @@ function updatemarketingSpendChart(labels) {
                     }
                 }
             }
-        }
+        })
     });
 }
 
@@ -2060,7 +2086,7 @@ function updateNettovinstChart(labels) {
                 fill: false
             }]
         },
-        options: {
+        options: getMobileChartOptions({
             responsive: true,
             maintainAspectRatio: false,
             layout: {
@@ -2118,7 +2144,7 @@ function updateNettovinstChart(labels) {
                     }
                 }
             }
-        }
+        })
     });
 }
 
@@ -2173,7 +2199,7 @@ function updateLostMarginChart(labels) {
                 fill: false
             }]
         },
-        options: {
+        options: getMobileChartOptions({
             responsive: true,
             maintainAspectRatio: false,
             layout: {
@@ -2253,7 +2279,7 @@ function updateLostMarginChart(labels) {
                     }
                 }
             }
-        }
+        })
     });
 }
 
@@ -2308,7 +2334,7 @@ function updateMarketingShareOfGrossprofitChart(labels) {
                 fill: false
             }]
         },
-        options: {
+        options: getMobileChartOptions({
             responsive: true,
             maintainAspectRatio: false,
             layout: {
@@ -2382,7 +2408,7 @@ function updateMarketingShareOfGrossprofitChart(labels) {
                     }
                 }
             }
-        }
+        })
     });
 }
 
@@ -2438,7 +2464,7 @@ function updateNetProfitPerAdCrownChart(labels) {
                 fill: false
             }]
         },
-        options: {
+        options: getMobileChartOptions({
             responsive: true,
             maintainAspectRatio: false,
             layout: {
@@ -2519,7 +2545,7 @@ function updateNetProfitPerAdCrownChart(labels) {
                     }
                 }
             }
-        }
+        })
     });
 }
 
@@ -2897,4 +2923,143 @@ function updateFormulaThresholds() {
 
         element.innerHTML = text + recommendations;
     });
+}
+
+// Mobile menu functions
+function toggleMobileMenu() {
+    const mobileMenu = document.getElementById('mobileMenu');
+    if (mobileMenu.style.display === 'block') {
+        closeMobileMenu();
+    } else {
+        mobileMenu.style.display = 'block';
+        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    }
+}
+
+function closeMobileMenu() {
+    const mobileMenu = document.getElementById('mobileMenu');
+    mobileMenu.style.display = 'none';
+    document.body.style.overflow = ''; // Restore scrolling
+}
+
+function switchTab(tabId) {
+    // Hide all tab panes
+    document.querySelectorAll('.tab-pane').forEach(pane => {
+        pane.classList.remove('show', 'active');
+    });
+
+    // Show selected tab pane
+    const targetPane = document.getElementById(tabId);
+    if (targetPane) {
+        targetPane.classList.add('show', 'active');
+    }
+
+    // Update tab buttons
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+    });
+
+    const targetTab = document.getElementById(tabId + '-tab');
+    if (targetTab) {
+        targetTab.classList.add('active');
+    }
+
+    // Update mobile menu active state
+    document.querySelectorAll('.mobile-menu-item').forEach(item => {
+        item.classList.remove('active');
+    });
+
+    // Trigger chart updates if switching to analytics
+    if (tabId === 'analytics') {
+        setTimeout(() => {
+            updateTrendsChart();
+            updateIndividualCharts();
+        }, 100);
+    } else if (tabId === 'predictive-analytics') {
+        setTimeout(async () => {
+            await initializePOASAnalytics();
+        }, 100);
+    }
+}
+
+// Check if device is mobile for chart configuration
+function isMobile() {
+    return window.innerWidth <= 576;
+}
+
+// Get mobile-optimized chart options
+function getMobileChartOptions(baseOptions = {}) {
+    if (!isMobile()) {
+        return baseOptions;
+    }
+
+    // Mobile optimizations
+    const mobileOptions = {
+        ...baseOptions,
+        layout: {
+            ...baseOptions.layout,
+            padding: {
+                left: 5, // Increased left padding for y-axis
+                right: 5, // Increased right padding
+                top: 10,
+                bottom: 30 // Much more bottom padding to accommodate rotated labels
+            }
+        },
+        scales: {
+            ...baseOptions.scales,
+            x: {
+                ...baseOptions.scales?.x,
+                ticks: {
+                    ...baseOptions.scales?.x?.ticks,
+                    padding: 5, // More padding for better spacing
+                    maxRotation: 35, // Reduced rotation for better readability
+                    minRotation: 35, // Consistent rotation
+                    font: {
+                        size: 9 // Smaller font to fit better
+                    }
+                }
+            },
+            y: {
+                ...baseOptions.scales?.y,
+                // Keep y-axis visible but make it more compact for mobile
+                ticks: {
+                    ...baseOptions.scales?.y?.ticks,
+                    font: {
+                        size: 9 // Smaller font for mobile
+                    },
+                    maxTicksLimit: 5 // Limit number of ticks to save space
+                },
+                title: {
+                    ...baseOptions.scales?.y?.title,
+                    font: {
+                        size: 10 // Smaller title font
+                    }
+                }
+            }
+        },
+        plugins: {
+            ...baseOptions.plugins,
+            legend: {
+                ...baseOptions.plugins?.legend,
+                position: 'top',
+                labels: {
+                    ...baseOptions.plugins?.legend?.labels,
+                    boxWidth: 12,
+                    font: {
+                        size: 10
+                    },
+                    padding: 6
+                }
+            }
+        },
+        elements: {
+            ...baseOptions.elements,
+            point: {
+                ...baseOptions.elements?.point,
+                radius: 2 // Smaller points on mobile
+            }
+        }
+    };
+
+    return mobileOptions;
 }
